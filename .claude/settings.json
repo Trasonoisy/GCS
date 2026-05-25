@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($gpp = 'C:\\\\QtOnline\\\\Tools\\\\mingw1310_64\\\\bin\\\\g++.exe'; $qt = 'C:\\\\QtOnline\\\\6.11.1\\\\mingw_64'; $src = 'C:\\\\ky2_nam4\\\\thuctap\\\\GCS_ver2\\\\src'; $inc = \"-I$qt\\\\include -I$qt\\\\include\\\\QtCore -I$qt\\\\include\\\\QtNetwork -I$src -DQT_CORE_LIB -DQT_NETWORK_LIB\"; foreach \\($f in @\\('Comms\\\\LinkManager.cpp','Comms\\\\MockLink.cpp','Comms\\\\UdpLink.cpp'\\)\\) { \"--- $f ---\"; & $gpp -std=c++17 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -fsyntax-only $inc.Split\\(' '\\) \"$src\\\\$f\" 2>&1 | Select-Object -First 30 })"
+    ]
+  }
+}
