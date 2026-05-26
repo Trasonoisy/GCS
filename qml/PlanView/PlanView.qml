@@ -7,32 +7,59 @@ Rectangle {
     id: root
     color: "#121212"
 
-    GridLayout {
+    ScrollView {
+        id: planScroll
         anchors.fill: parent
-        anchors.margins: 12
-        columns: 2
-        columnSpacing: 12
-        rowSpacing: 12
+        clip: true
+        contentWidth: availableWidth
+        contentHeight: planContent.y + planContent.implicitHeight + 12
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-        WaypointList {
-            Layout.column: 0; Layout.row: 0
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.preferredWidth: 480
-        }
-        WaypointEditor {
-            Layout.column: 1; Layout.row: 0
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.preferredWidth: 320
-        }
-        MissionActions {
-            Layout.column: 0; Layout.row: 1
-            Layout.fillWidth: true
-            Layout.preferredHeight: 260
-        }
-        ValidationPanel {
-            Layout.column: 1; Layout.row: 1
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.preferredHeight: 260
+        RowLayout {
+            id: planContent
+            x: 12
+            y: 12
+            width: Math.max(0, planScroll.availableWidth - 24)
+            spacing: 12
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 560
+                Layout.minimumWidth: 420
+                spacing: 12
+
+                WaypointList {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 180
+                }
+                MissionActions {
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: implicitHeight
+                    Layout.preferredHeight: implicitHeight
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 420
+                Layout.minimumWidth: 340
+                spacing: 12
+
+                WaypointEditor {
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: implicitHeight
+                    Layout.preferredHeight: implicitHeight
+                }
+                ValidationPanel {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 180
+                }
+            }
         }
     }
 }

@@ -13,8 +13,11 @@ Rectangle {
     radius: 6
 
     implicitWidth: 320
+    implicitHeight: Math.max(96, cardLayout.implicitHeight + 24)
+    clip: true
 
     ColumnLayout {
+        id: cardLayout
         anchors.fill: parent
         anchors.margins: 12
         spacing: 8

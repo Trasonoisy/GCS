@@ -1,6 +1,7 @@
 #include "MemoryLogSink.h"
 
 #include <QDateTime>
+#include <QTimeZone>
 
 namespace gcs::logging {
 
@@ -30,7 +31,7 @@ QStringList MemoryLogSink::formattedEvents() const
 
 QString MemoryLogSink::formatEvent(const LogEvent& e)
 {
-    const QString stamp = QDateTime::fromMSecsSinceEpoch(e.timestampUtcMs, Qt::UTC)
+    const QString stamp = QDateTime::fromMSecsSinceEpoch(e.timestampUtcMs, QTimeZone::UTC)
                           .toString(QStringLiteral("HH:mm:ss"));
     return QStringLiteral("[%1 %2/%3] %4")
         .arg(stamp, e.severity.toUpper(), e.category, e.message);
