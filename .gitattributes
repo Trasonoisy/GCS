@@ -1,0 +1,65 @@
+# Normalize line endings: store LF in the repo, let Git decide on checkout.
+# Combined with the explicit overrides below, this prevents CRLF/LF churn
+# that previously made ~130 files look "modified" after a checkout.
+* text=auto eol=lf
+
+# ============================================================
+# Text (always LF, even on Windows checkout)
+# ============================================================
+*.cpp       text eol=lf
+*.h         text eol=lf
+*.hpp       text eol=lf
+*.cc        text eol=lf
+*.c         text eol=lf
+*.qml       text eol=lf
+*.qrc       text eol=lf
+*.qmldir    text eol=lf
+*.cmake     text eol=lf
+*.txt       text eol=lf
+*.md        text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.xml       text eol=lf
+*.svg       text eol=lf
+*.py        text eol=lf
+*.sh        text eol=lf
+CMakeLists.txt text eol=lf
+
+# ============================================================
+# Windows-only scripts: CRLF required
+# ============================================================
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+*.psm1      text eol=crlf
+
+# ============================================================
+# Binary (never touch)
+# ============================================================
+*.exe       binary
+*.dll       binary
+*.so        binary
+*.dylib     binary
+*.a         binary
+*.lib       binary
+*.o         binary
+*.obj       binary
+*.pdb       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.bmp       binary
+*.tiff      binary
+*.webp      binary
+*.pdf       binary
+*.zip       binary
+*.tar       binary
+*.gz        binary
+*.7z        binary
+*.bin       binary
+*.tlog      binary
+*.ulg       binary
+*.bin.log   binary

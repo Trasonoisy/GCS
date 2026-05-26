@@ -1,0 +1,102 @@
+# ============================================================
+# Build output
+# ============================================================
+build/
+build-*/
+out/
+cmake-build-*/
+install/
+.cache/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake.in
+compile_commands.json
+
+# ============================================================
+# Qt / qmake
+# ============================================================
+*.user
+*.user.*
+*.autosave
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+.qmake.stash
+.qmake.cache
+.qmlls.ini
+
+# ============================================================
+# Compiled binaries
+# ============================================================
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.gch
+*.pch
+
+# ============================================================
+# Editor / IDE
+# ============================================================
+# Claude Code: keep settings.json (shared rules), ignore the user-local one.
+.claude/settings.local.json
+.claude/projects/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/history.jsonl
+
+# JetBrains
+.idea/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+CMakeLists.txt.user
+CMakeLists.txt.user.*
+
+# Visual Studio
+.vs/
+*.suo
+*.ntvs_analysis.dat
+
+# Vim / Emacs
+*~
+*.swp
+*.swo
+\#*\#
+.\#*
+
+# ============================================================
+# OS junk
+# ============================================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ============================================================
+# Runtime logs / scratch
+# ============================================================
+*.log
+*.tmp
+*.bak
+*.orig
