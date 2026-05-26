@@ -1,5 +1,8 @@
 #include "VehicleViewModel.h"
 
+#include <QVariantMap>
+#include <cmath>
+
 #include "Vehicle/MultiVehicleManager.h"
 #include "Vehicle/Vehicle.h"
 #include "Vehicle/VehicleStateStore.h"
@@ -55,11 +58,16 @@ void VehicleViewModel::rebind(Vehicle* vehicle)
 
     m_vehicle = vehicle;
     m_events.clear();
+    m_trail.clear();
+    m_haveLastTrailPoint = false;
 
     if (m_vehicle) {
+        // Drive both the generic UI refresh AND the trail builder from the
+        // same store-changed signal so the map polyline stays in lock-step
+        // with the rest of the telemetry display.
         connect(m_vehicle->stateStore(),
                 &gcs::vehicle::VehicleStateStore::stateChanged,
-                this, &VehicleViewModel::changed);
+                this, &VehicleViewModel::onVehicleStateChanged);
         connect(m_vehicle, &Vehicle::eventAppended,
                 this, &VehicleViewModel::onVehicleEventAppended);
 
@@ -71,6 +79,59 @@ void VehicleViewModel::rebind(Vehicle* vehicle)
 
     emit changed();
     emit eventLogChanged();
+    emit trailChanged();
+}
+
+void VehicleViewModel::onVehicleStateChanged()
+{
+    if (m_vehicle) {
+        const auto& s = m_vehicle->stateStore()->state();
+        appendTrailPointIfMoved(s.latitudeDeg, s.longitudeDeg);
+    }
+    emit changed();
+}
+
+void VehicleViewModel::appendTrailPointIfMoved(double lat, double lon)
+{
+    // Skip points before we have any GPS fix (avoids a (0,0) ghost segment
+    // from the equator to the first valid sample).
+    if (!std::isfinite(lat) || !std::isfinite(lon)) return;
+    if (lat == 0.0 && lon == 0.0) return;
+
+    if (m_haveLastTrailPoint) {
+        const double dLat = std::abs(lat - m_lastTrailLat);
+        const double dLon = std::abs(lon - m_lastTrailLon);
+        if (dLat < kMinTrailDeltaDeg && dLon < kMinTrailDeltaDeg) return;
+    }
+
+    QVariantMap p;
+    p[QStringLiteral("lat")] = lat;
+    p[QStringLiteral("lon")] = lon;
+    m_trail.append(p);
+    while (m_trail.size() > kMaxTrailPoints) {
+        m_trail.removeFirst();
+    }
+    m_lastTrailLat = lat;
+    m_lastTrailLon = lon;
+    m_haveLastTrailPoint = true;
+    emit trailChanged();
+}
+
+bool VehicleViewModel::hasValidPosition() const
+{
+    if (!m_vehicle) return false;
+    const auto& s = m_vehicle->stateStore()->state();
+    if (!std::isfinite(s.latitudeDeg) || !std::isfinite(s.longitudeDeg)) return false;
+    if (s.latitudeDeg == 0.0 && s.longitudeDeg == 0.0) return false;
+    return true;
+}
+
+void VehicleViewModel::clearTrail()
+{
+    if (m_trail.isEmpty() && !m_haveLastTrailPoint) return;
+    m_trail.clear();
+    m_haveLastTrailPoint = false;
+    emit trailChanged();
 }
 
 void VehicleViewModel::onVehicleEventAppended(const QString& message)

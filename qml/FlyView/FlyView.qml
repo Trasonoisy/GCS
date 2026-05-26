@@ -74,10 +74,23 @@ Rectangle {
                     ConnectionPanel  { Layout.fillWidth: true; Layout.minimumHeight: implicitHeight }
                 }
 
-                AlertPanel {
+                ColumnLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.minimumHeight: 360
+                    spacing: 12
+
+                    FlyMapPanel {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: 360
+                        Layout.preferredHeight: 500
+                    }
+
+                    AlertPanel {
+                        Layout.fillWidth: true
+                        Layout.minimumHeight: 180
+                        Layout.preferredHeight: 220
+                    }
                 }
             }
         }

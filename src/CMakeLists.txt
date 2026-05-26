@@ -160,6 +160,8 @@ target_link_libraries(LabGCSApp
         gcs_ui
         Qt6::Quick
         Qt6::QuickControls2
+        Qt6::Positioning
+        Qt6::Location
 )
 
 set_target_properties(LabGCSApp PROPERTIES

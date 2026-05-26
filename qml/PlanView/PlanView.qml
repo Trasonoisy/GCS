@@ -26,14 +26,20 @@ Rectangle {
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.preferredWidth: 560
-                Layout.minimumWidth: 420
+                Layout.preferredWidth: 620
+                Layout.minimumWidth: 460
                 spacing: 12
 
-                WaypointList {
+                PlanMapPanel {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.minimumHeight: 320
+                    Layout.preferredHeight: 420
+                }
+                WaypointList {
+                    Layout.fillWidth: true
                     Layout.minimumHeight: 180
+                    Layout.preferredHeight: 220
                 }
                 MissionActions {
                     Layout.fillWidth: true

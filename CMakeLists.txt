@@ -27,6 +27,17 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS
     Test
 )
 
+# Map integration (FlyView + PlanView). Qt Location uses Qt Positioning. The
+# OSM plugin renders OpenStreetMap raster tiles, which is policy-safe for a
+# lab/research GCS as long as we respect the OSM Tile Usage Policy (sane
+# refresh rates, a clear User-Agent, and visible attribution — set in
+# qml/Common/MapView.qml). If these modules are missing, install them via the
+# Qt Maintenance Tool: "Qt 6.x → MinGW → Qt Positioning" and "Qt Location".
+find_package(Qt6 6.4 REQUIRED COMPONENTS
+    Positioning
+    Location
+)
+
 # Phase 7: Qt6::SerialPort is optional. Without it, SerialLink compiles as a
 # graceful stub (connectLink() emits an errorOccurred explaining how to
 # install the module). Installing the Qt SerialPort module and reconfiguring
@@ -79,4 +90,7 @@ qt_add_qml_module(LabGCSApp
         qml/Common/InfoCard.qml
         qml/Common/SimulationBanner.qml
         qml/Common/HardwareModeBanner.qml
+        qml/Common/MapView.qml
+        qml/FlyView/FlyMapPanel.qml
+        qml/PlanView/PlanMapPanel.qml
 )
