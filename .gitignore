@@ -100,3 +100,6 @@ $RECYCLE.BIN/
 *.tmp
 *.bak
 *.orig
+
+# VS Code (machine-local IntelliSense paths)
+.vscode/
