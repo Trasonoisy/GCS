@@ -54,6 +54,12 @@ class VehicleViewModel : public QObject
     // True only when latitude/longitude are usable for map display — guards
     // the map from snapping to (0,0) before the first GPS fix.
     Q_PROPERTY(bool         hasValidPosition READ hasValidPosition  NOTIFY changed)
+    // Heading for the map marker: course-over-ground computed from successive
+    // trail points. Frozen at the last "moving" bearing when the vehicle is
+    // stationary — unlike headingDeg, which mirrors the raw autopilot value
+    // and can spin even when the vehicle is parked (the mock vehicle in
+    // particular increments heading every tick for telemetry-realism testing).
+    Q_PROPERTY(double       displayHeadingDeg READ displayHeadingDeg NOTIFY trailChanged)
 
 public:
     explicit VehicleViewModel(gcs::vehicle::MultiVehicleManager* manager,
@@ -84,6 +90,7 @@ public:
     QStringList eventLog()      const;
     QVariantList trail()        const { return m_trail; }
     bool        hasValidPosition() const;
+    double      displayHeadingDeg() const { return m_displayHeadingDeg; }
 
     Q_INVOKABLE void clearTrail();
 
@@ -109,13 +116,28 @@ private:
     double m_lastTrailLat = 0.0;
     double m_lastTrailLon = 0.0;
     bool   m_haveLastTrailPoint = false;
+    // Separate anchor for bearing updates. We only recompute the marker
+    // heading when the vehicle has translated meaningfully — small loiter
+    // orbits and GPS drift would otherwise spin the marker continuously.
+    double m_lastBearingLat = 0.0;
+    double m_lastBearingLon = 0.0;
+    bool   m_haveLastBearingPoint = false;
+    // Frozen at the last bearing computed from a real displacement. Until the
+    // vehicle moves once, defaults to 0 (north) so the marker points "up".
+    double m_displayHeadingDeg = 0.0;
     QTimer m_heartbeatAgeTimer;
     static constexpr int kMaxUiEvents   = 200;
     static constexpr int kMaxTrailPoints = 2000;
     // Don't record a new trail point unless the vehicle moved at least this
     // many degrees from the last recorded point — keeps memory bounded for
     // a stationary mock vehicle while still preserving curved paths.
-    static constexpr double kMinTrailDeltaDeg = 1e-5; // ~1.1 m at equator
+    static constexpr double kMinTrailDeltaDeg   = 1e-5;   // ~1.1 m at equator
+    // Threshold for bearing (marker heading) updates. Picked deliberately
+    // larger than typical loiter/hover orbits and GPS drift so the marker
+    // stays still while the vehicle is "in one place". At the equator this
+    // is ~28 m; at higher latitudes the east/west axis shrinks (cos(lat))
+    // but the worst case is still bounded by the north/south axis.
+    static constexpr double kMinBearingDeltaDeg = 2.5e-4; // ~28 m at equator
 };
 
 } // namespace gcs::viewmodels

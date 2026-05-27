@@ -42,6 +42,10 @@ Item {
 
     signal mapClicked(var coordinate)
     signal mapDoubleClicked(var coordinate)
+    // Emitted when the operator manually pans, pinches, or wheel-zooms the
+    // map. Parents that auto-centre on telemetry (FlyMapPanel) should use
+    // this to turn off follow-mode so the map stays where the user put it.
+    signal userInteracted()
 
     function setCenter(lat, lon) {
         if (!isFinite(lat) || !isFinite(lon)) return
@@ -87,26 +91,76 @@ Item {
         plugin: osmPlugin
         center: QtPositioning.coordinate(root.initialLatitude, root.initialLongitude)
         zoomLevel: root.initialZoom
-        // Smooth zoom on wheel; keeps panning responsive even when the
-        // backend Vehicle is updating telemetry at 10+ Hz.
         copyrightsVisible: true
 
-        // Forward click events. We pass the geo-coordinate so PlanView can
-        // turn a click into a waypoint without needing to know the pixel
-        // geometry.
-        MouseArea {
-            anchors.fill: parent
+        // Pan: Qt 6.11 QtLocation removed the legacy `gesture` property, so
+        // map panning is no longer automatic — we drive it from an explicit
+        // DragHandler that converts pixel deltas into a centre-coordinate
+        // shift. Two finger pinch is handled by PinchHandler below.
+        property point _dragRefPx
+        property var   _dragRefCoord
+
+        DragHandler {
+            id: panHandler
+            target: null
             acceptedButtons: Qt.LeftButton
-            propagateComposedEvents: true
-            onClicked: function(mouse) {
-                const c = mapImpl.toCoordinate(Qt.point(mouse.x, mouse.y))
-                root.mapClicked(c)
-                mouse.accepted = false
+            onActiveChanged: {
+                if (active) {
+                    mapImpl._dragRefPx    = centroid.position
+                    mapImpl._dragRefCoord = mapImpl.toCoordinate(centroid.position)
+                    root.userInteracted()
+                }
             }
-            onDoubleClicked: function(mouse) {
-                const c = mapImpl.toCoordinate(Qt.point(mouse.x, mouse.y))
+            onCentroidChanged: {
+                if (!active || !mapImpl._dragRefCoord) return
+                // Re-anchor: take the original world coordinate that was under
+                // the finger at press, ask the map where the finger is now in
+                // pixels, then shift centre so the same world point stays
+                // glued to the new pixel.
+                const refPx     = mapImpl.fromCoordinate(mapImpl._dragRefCoord, false)
+                const dx        = centroid.position.x - refPx.x
+                const dy        = centroid.position.y - refPx.y
+                const centrePx  = mapImpl.fromCoordinate(mapImpl.center, false)
+                mapImpl.center  = mapImpl.toCoordinate(
+                    Qt.point(centrePx.x - dx, centrePx.y - dy))
+            }
+        }
+
+        PinchHandler {
+            target: null
+            onActiveChanged: if (active) root.userInteracted()
+            onActiveScaleChanged: {
+                const z = mapImpl.zoomLevel + Math.log2(activeScale)
+                mapImpl.zoomLevel = Math.max(mapImpl.minimumZoomLevel,
+                                  Math.min(mapImpl.maximumZoomLevel, z))
+            }
+        }
+
+        // Wheel zoom (Qt 6 doesn't wire mouse-wheel to Map by default).
+        WheelHandler {
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            onWheel: function(event) {
+                const delta = event.angleDelta.y / 120
+                mapImpl.zoomLevel = Math.max(mapImpl.minimumZoomLevel,
+                                  Math.min(mapImpl.maximumZoomLevel,
+                                           mapImpl.zoomLevel + delta))
+                root.userInteracted()
+            }
+        }
+
+        // Forward tap events without blocking pan. gesturePolicy:DragThreshold
+        // (the default) releases the touch as soon as the pointer moves past
+        // the drag threshold, so a click-and-drag becomes a pan, not a tap.
+        TapHandler {
+            acceptedButtons: Qt.LeftButton
+            gesturePolicy: TapHandler.DragThreshold
+            onTapped: function(eventPoint) {
+                const c = mapImpl.toCoordinate(eventPoint.position)
+                root.mapClicked(c)
+            }
+            onDoubleTapped: function(eventPoint) {
+                const c = mapImpl.toCoordinate(eventPoint.position)
                 root.mapDoubleClicked(c)
-                mouse.accepted = false
             }
         }
     }

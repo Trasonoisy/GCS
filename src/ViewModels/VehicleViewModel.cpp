@@ -1,6 +1,7 @@
 #include "VehicleViewModel.h"
 
 #include <QVariantMap>
+#include <QtMath>
 #include <cmath>
 
 #include "Vehicle/MultiVehicleManager.h"
@@ -60,6 +61,8 @@ void VehicleViewModel::rebind(Vehicle* vehicle)
     m_events.clear();
     m_trail.clear();
     m_haveLastTrailPoint = false;
+    m_haveLastBearingPoint = false;
+    m_displayHeadingDeg = 0.0;
 
     if (m_vehicle) {
         // Drive both the generic UI refresh AND the trail builder from the
@@ -98,6 +101,43 @@ void VehicleViewModel::appendTrailPointIfMoved(double lat, double lon)
     if (!std::isfinite(lat) || !std::isfinite(lon)) return;
     if (lat == 0.0 && lon == 0.0) return;
 
+    // ---- bearing (marker heading) -----------------------------------------
+    //
+    // Run BEFORE the trail-threshold gate so the marker still tracks
+    // direction even when individual telemetry samples are tiny.
+    //
+    // We anchor against m_lastBearingLat/Lon (NOT the last trail point)
+    // because the bearing threshold (~28 m) is much larger than the trail
+    // threshold (~1.1 m). Anchoring on the trail point would make the
+    // marker spin on every tight loiter circle — exactly the bug we are
+    // fixing — since each ~1 m trail sample produces a wildly different
+    // bearing as the vehicle orbits.
+    if (m_haveLastBearingPoint) {
+        const double bdLat = std::abs(lat - m_lastBearingLat);
+        const double bdLon = std::abs(lon - m_lastBearingLon);
+        if (bdLat >= kMinBearingDeltaDeg || bdLon >= kMinBearingDeltaDeg) {
+            // Initial-bearing formula on a sphere (Aviation Formulary §1).
+            const double phi1    = qDegreesToRadians(m_lastBearingLat);
+            const double phi2    = qDegreesToRadians(lat);
+            const double dLambda = qDegreesToRadians(lon - m_lastBearingLon);
+            const double y       = std::sin(dLambda) * std::cos(phi2);
+            const double x       = std::cos(phi1) * std::sin(phi2)
+                                 - std::sin(phi1) * std::cos(phi2) * std::cos(dLambda);
+            double brg = qRadiansToDegrees(std::atan2(y, x));
+            if (brg < 0.0) brg += 360.0;
+            m_displayHeadingDeg = brg;
+            m_lastBearingLat = lat;
+            m_lastBearingLon = lon;
+        }
+    } else {
+        // First valid sample: seed the bearing anchor; leave the marker
+        // pointing at its default (north / 0°) until a real move happens.
+        m_lastBearingLat = lat;
+        m_lastBearingLon = lon;
+        m_haveLastBearingPoint = true;
+    }
+
+    // ---- trail (fine-grained breadcrumb polyline) -------------------------
     if (m_haveLastTrailPoint) {
         const double dLat = std::abs(lat - m_lastTrailLat);
         const double dLon = std::abs(lon - m_lastTrailLon);
@@ -131,6 +171,9 @@ void VehicleViewModel::clearTrail()
     if (m_trail.isEmpty() && !m_haveLastTrailPoint) return;
     m_trail.clear();
     m_haveLastTrailPoint = false;
+    // Leave m_displayHeadingDeg at its current value — clearing the trail
+    // is a visual operation; we don't want the marker to suddenly snap to
+    // north just because the operator wiped the breadcrumbs.
     emit trailChanged();
 }
 

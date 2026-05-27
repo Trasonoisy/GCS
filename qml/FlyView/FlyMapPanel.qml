@@ -27,6 +27,11 @@ InfoCard {
         Layout.fillHeight: true
         Layout.minimumHeight: 320
 
+        // Any manual pan / pinch / wheel zoom turns off Follow so the map
+        // stays where the operator put it. To resume auto-centring, tick
+        // the "Follow vehicle" checkbox in the on-map toolbar again.
+        onUserInteracted: root.followVehicle = false
+
         // ---- auto-centre on vehicle when the toggle is on ---------------
 
         Connections {
@@ -118,7 +123,11 @@ InfoCard {
             sourceItem: Item {
                 id: vehicleMarker
                 width: 38; height: 38
-                rotation: vehicleVm.headingDeg
+                // Use displayHeadingDeg (course over ground, frozen when
+                // stationary) so the marker doesn't spin when the vehicle
+                // is parked. The on-map status overlay below still shows
+                // the raw autopilot headingDeg for telemetry truthfulness.
+                rotation: vehicleVm.displayHeadingDeg
                 // Triangle pointing up; rotated by heading.
                 Canvas {
                     id: vehicleCanvas
