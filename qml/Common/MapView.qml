@@ -74,13 +74,14 @@ Item {
     Plugin {
         id: osmPlugin
         name: "osm"
-        // Use the standard OSM raster style. `osm.useragent` lets us identify
-        // ourselves to the tile server — required by the OSM Tile Usage
-        // Policy. Disabling providers repository avoids opportunistic fetches.
-        PluginParameter { name: "osm.useragent";              value: "LabGCS/0.1 (lab research GCS)" }
+        // `osm.useragent` identifies us to the tile server. CustomMap uses
+        // the host below and avoids stale provider fallback metadata.
+        PluginParameter { name: "osm.useragent";              value: "LabGCS/0.1 lab research GCS" }
+        PluginParameter { name: "osm.mapping.custom.host";    value: "https://tile.openstreetmap.org/" }
+        PluginParameter { name: "osm.mapping.custom.mapcopyright";  value: "Map data (C) OpenStreetMap contributors" }
+        PluginParameter { name: "osm.mapping.custom.datacopyright"; value: "Map data (C) OpenStreetMap contributors" }
+        PluginParameter { name: "osm.mapping.prefetching_style";    value: "NoPrefetching" }
         PluginParameter { name: "osm.mapping.providersrepository.disabled"; value: "true" }
-        // Map type "Street Map" (id 1) is the default; we let the user
-        // see the attribution rendered by the OSM provider.
     }
 
     // ---- map ------------------------------------------------------------
@@ -92,6 +93,21 @@ Item {
         center: QtPositioning.coordinate(root.initialLatitude, root.initialLongitude)
         zoomLevel: root.initialZoom
         copyrightsVisible: true
+
+        function selectCustomMapType() {
+            for (let i = 0; i < supportedMapTypes.length; ++i) {
+                if (supportedMapTypes[i].style === MapType.CustomMap) {
+                    activeMapType = supportedMapTypes[i]
+                    return
+                }
+            }
+            if (supportedMapTypes.length > 0) {
+                activeMapType = supportedMapTypes[0]
+            }
+        }
+
+        Component.onCompleted: selectCustomMapType()
+        onSupportedMapTypesChanged: selectCustomMapType()
 
         // Pan: Qt 6.11 QtLocation removed the legacy `gesture` property, so
         // map panning is no longer automatic — we drive it from an explicit

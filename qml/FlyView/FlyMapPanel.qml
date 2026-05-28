@@ -128,32 +128,17 @@ InfoCard {
                 // is parked. The on-map status overlay below still shows
                 // the raw autopilot headingDeg for telemetry truthfulness.
                 rotation: vehicleVm.displayHeadingDeg
-                // Triangle pointing up; rotated by heading.
-                Canvas {
-                    id: vehicleCanvas
-                    anchors.fill: parent
-                    onPaint: {
-                        const ctx = getContext("2d")
-                        ctx.reset()
-                        ctx.beginPath()
-                        ctx.moveTo(width / 2, 2)
-                        ctx.lineTo(width - 4, height - 4)
-                        ctx.lineTo(width / 2, height * 0.7)
-                        ctx.lineTo(4, height - 4)
-                        ctx.closePath()
-                        ctx.fillStyle   = vehicleVm.armed ? "#FF5555" : "#FFAA33"
-                        ctx.strokeStyle = "white"
-                        ctx.lineWidth   = 2
-                        ctx.fill()
-                        ctx.stroke()
-                    }
-                    Connections {
-                        // Re-paint when armed state changes so the colour
-                        // tracks the vehicle. Position changes don't need a
-                        // repaint (the MapQuickItem coordinate handles it).
-                        target: vehicleVm
-                        function onChanged() { vehicleCanvas.requestPaint() }
-                    }
+                // Triangle pointing up; rotated by heading. Use text instead
+                // of Canvas so telemetry updates cannot trigger requestPaint()
+                // on the wrong QML object through a nested sourceItem context.
+                Label {
+                    anchors.centerIn: parent
+                    text: "\u25B2"
+                    color: vehicleVm.armed ? "#FF5555" : "#FFAA33"
+                    font.bold: true
+                    font.pixelSize: 32
+                    style: Text.Outline
+                    styleColor: "white"
                 }
             }
         }

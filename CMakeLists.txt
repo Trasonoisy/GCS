@@ -93,4 +93,7 @@ qt_add_qml_module(LabGCSApp
         qml/Common/MapView.qml
         qml/FlyView/FlyMapPanel.qml
         qml/PlanView/PlanMapPanel.qml
+        qml/Shell/WelcomeView.qml
+        qml/Shell/ConnectView.qml
+        qml/Shell/MainShell.qml
 )
