@@ -83,10 +83,13 @@ private:
     double m_voltage        = 16.8;
     double m_percent        = 100.0;
     int    m_tickCount      = 0;
+    double m_simLat         = m_baseLat;
+    double m_simLon         = m_baseLon;
 
     // Last received manual-control sample (Phase 4).
     int16_t m_lastX = 0, m_lastY = 0, m_lastZ = 500, m_lastR = 0;
     int     m_manualSampleCount = 0;
+    qint64  m_lastManualSampleUtcMs = 0;
 };
 
 } // namespace gcs::simulation

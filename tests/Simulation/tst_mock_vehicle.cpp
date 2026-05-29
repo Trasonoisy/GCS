@@ -18,6 +18,7 @@ private slots:
     void marksStateSimulated();
     void heartbeatTickPromotesLinkAndStampsTime();
     void telemetryTickUpdatesMotionFields();
+    void manualSamplesDriveSimulatedTelemetry();
     void appendsStartEvent();
 };
 
@@ -62,6 +63,31 @@ void TestMockVehicle::telemetryTickUpdatesMotionFields()
     QVERIFY(s.longitudeDeg != 0.0);
     QVERIFY(s.headingDeg != headingBefore);
     QVERIFY(s.groundSpeedMps >= 2.0); // sin(...) baseline ~3 m/s
+}
+
+void TestMockVehicle::manualSamplesDriveSimulatedTelemetry()
+{
+    PX4FirmwarePlugin fw;
+    Vehicle vehicle(1, 1, &fw);
+    MockVehicle mock(&vehicle);
+
+    mock.tickTelemetryNow();
+    const auto before = vehicle.stateStore()->state();
+
+    mock.onManualControlSample(/*pitch*/ 1000, /*roll*/ 500,
+                               /*throttle*/ 1000, /*yaw*/ 1000,
+                               /*buttons*/ 0);
+    mock.tickTelemetryNow();
+    const auto after = vehicle.stateStore()->state();
+
+    QVERIFY(after.latitudeDeg != before.latitudeDeg
+            || after.longitudeDeg != before.longitudeDeg);
+    QVERIFY(after.relativeAltitudeM > before.relativeAltitudeM);
+    QVERIFY(after.headingDeg != before.headingDeg);
+    QVERIFY(after.rollDeg > 0.0);
+    QVERIFY(after.pitchDeg > 0.0);
+    QVERIFY(after.groundSpeedMps > 0.0);
+    QCOMPARE(mock.manualSampleCount(), 1);
 }
 
 void TestMockVehicle::appendsStartEvent()
