@@ -255,6 +255,10 @@ int main(int argc, char* argv[])
                                 .arg(sysid).arg(reason));
                     });
             }
+            if (auto* current = multi->activeVehicle();
+                !current || current->stateStore()->state().simulated) {
+                multi->setActiveVehicle(v);
+            }
             return v;
         });
 
@@ -365,6 +369,10 @@ int main(int argc, char* argv[])
     auto* linkVm    = new gcs::viewmodels::LinkViewModel(linkMgr, &app);
     auto* manualVm  = new gcs::viewmodels::ManualControlViewModel(manual, joystick, multi, &app);
     auto* logVm     = new gcs::viewmodels::LogViewModel(logger, memorySink, &app);
+    QObject::connect(protocol, &gcs::protocol::MAVLinkProtocol::rawBytesIn,
+                     linkVm, &gcs::viewmodels::LinkViewModel::onBytesIn);
+    QObject::connect(protocol, &gcs::protocol::MAVLinkProtocol::unknownMessageReceived,
+                     linkVm, &gcs::viewmodels::LinkViewModel::onUnknownMsg);
     logVm->setCurrentLogPath(logPath);
 
     // Operator-action and validation logging tied to the QML-facing actions.

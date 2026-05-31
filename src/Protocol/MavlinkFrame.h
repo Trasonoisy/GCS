@@ -200,9 +200,10 @@ QByteArray encodeMissionRequestList (const MissionRequestList& in);
 
 // ---------- Frame builder ----------
 
-// Build a MAVLink v2 frame with no signature and a placeholder CRC. The
-// parser ignores CRC so this is sufficient for SITL telemetry; real-flight
-// (post-Phase-7) must vendor c_library_v2 and validate per-msgid extra CRCs.
+// Build a MAVLink v2 frame with no signature and the common.xml CRC_EXTRA
+// values for the message IDs used by this MVP. The parser still does not
+// validate inbound CRCs; real-flight (post-Phase-7) must vendor c_library_v2
+// and validate all inbound/outbound dialect details.
 QByteArray buildV2Frame(int sysid, int compid, int msgid, const QByteArray& payload);
 
 } // namespace gcs::protocol

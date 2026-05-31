@@ -97,11 +97,20 @@ void MissionViewModel::addWaypoint()
     it.yawDeg      = qQNaN();
     it.autocontinue = true;
 
-    // Seed lat/lon from the previous waypoint if any (or 0/0).
+    // Seed lat/lon from the previous waypoint if any. For the first item,
+    // use the active vehicle's current fix when available so the operator
+    // does not accidentally create a mission at 0/0.
     if (!m_plan.items.isEmpty()) {
         const auto& prev = m_plan.items.last();
         it.latitudeDeg  = prev.latitudeDeg;
         it.longitudeDeg = prev.longitudeDeg;
+    } else if (m_activeVehicle) {
+        const auto& s = m_activeVehicle->stateStore()->state();
+        if (std::isfinite(s.latitudeDeg) && std::isfinite(s.longitudeDeg)
+            && !(s.latitudeDeg == 0.0 && s.longitudeDeg == 0.0)) {
+            it.latitudeDeg  = s.latitudeDeg;
+            it.longitudeDeg = s.longitudeDeg;
+        }
     }
     m_plan.items.append(it);
     markDirty();

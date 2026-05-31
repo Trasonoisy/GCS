@@ -21,6 +21,49 @@ T readLE(const QByteArray& p, int offset, T dflt = T{})
 constexpr quint8 kStxV1 = 0xFE;
 constexpr quint8 kStxV2 = 0xFD;
 
+quint8 crcExtraForMessage(int msgid)
+{
+    // MAVLink common.xml CRC_EXTRA values for the messages this MVP builds.
+    // PX4 validates these on outbound GCS frames; telemetry parsing remains
+    // permissive because Phase 7 real-flight work will vendor c_library_v2.
+    switch (msgid) {
+        case msgid::Heartbeat:          return 50;
+        case msgid::SysStatus:          return 124;
+        case msgid::GpsRawInt:          return 24;
+        case msgid::Attitude:           return 39;
+        case msgid::GlobalPositionInt:  return 104;
+        case msgid::VfrHud:             return 20;
+        case msgid::BatteryStatus:      return 154;
+        case msgid::Statustext:         return 83;
+        case msgid::MissionRequestList: return 132;
+        case msgid::MissionCount:       return 221;
+        case msgid::MissionAck:         return 153;
+        case msgid::MissionRequestInt:  return 196;
+        case msgid::MissionItemInt:     return 38;
+        default:                        return 0;
+    }
+}
+
+void x25Accumulate(quint8 byte, quint16& crc)
+{
+    quint8 tmp = byte ^ quint8(crc & 0xFF);
+    tmp ^= quint8(tmp << 4);
+    crc = quint16((crc >> 8)
+        ^ (quint16(tmp) << 8)
+        ^ (quint16(tmp) << 3)
+        ^ (quint16(tmp) >> 4));
+}
+
+quint16 mavlinkChecksum(const QByteArray& frameWithoutStx, quint8 crcExtra)
+{
+    quint16 crc = 0xFFFF;
+    for (const char c : frameWithoutStx) {
+        x25Accumulate(quint8(c), crc);
+    }
+    x25Accumulate(crcExtra, crc);
+    return crc;
+}
+
 } // namespace
 
 void MavlinkV2Parser::reset()
@@ -96,9 +139,9 @@ QByteArray buildV2Frame(int sysid, int compid, int msgid, const QByteArray& payl
     out.append(char((m >> 8) & 0xFF));
     out.append(char((m >> 16) & 0xFF));
     out.append(payload);
-    // Placeholder CRC bytes. The parser ignores CRC in Phase 3.
-    out.append(char(0));
-    out.append(char(0));
+    const quint16 crc = mavlinkChecksum(out.mid(1), crcExtraForMessage(msgid));
+    out.append(char(crc & 0xFF));
+    out.append(char((crc >> 8) & 0xFF));
     return out;
 }
 

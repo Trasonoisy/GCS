@@ -20,6 +20,7 @@ InfoCard {
     title: qsTr("Map — flight tracking")
 
     property bool followVehicle: true
+    property bool showTrail: false
 
     MapView {
         id: flyMap
@@ -97,6 +98,7 @@ InfoCard {
         // ---- vehicle trail (green) --------------------------------------
 
         MapPolyline {
+            visible: root.showTrail && vehicleVm.trail.length > 1
             line.width: 2
             line.color: "#7CFC7C"
             opacity: 0.9
@@ -165,6 +167,18 @@ InfoCard {
                 text: qsTr("Follow vehicle")
                 checked: root.followVehicle
                 onToggled: root.followVehicle = checked
+                contentItem: Label {
+                    text: parent.text
+                    color: "white"
+                    leftPadding: parent.indicator.width + 6
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            CheckBox {
+                text: qsTr("Show trail")
+                checked: root.showTrail
+                onToggled: root.showTrail = checked
                 contentItem: Label {
                     text: parent.text
                     color: "white"

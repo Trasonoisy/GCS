@@ -14,7 +14,23 @@ Rectangle {
     signal back()
     signal continueToMain()
 
-    readonly property bool anyRealLink: linkVm.connected || linkVm.serialConnected
+    readonly property bool sitlHeartbeatSeen: !vehicleVm.simulated
+                                             && vehicleVm.linkStatusText === "Connected"
+    readonly property bool anyRealLink: root.sitlHeartbeatSeen || linkVm.serialConnected
+    readonly property bool udpListeningOnly: linkVm.connected && !root.sitlHeartbeatSeen
+
+    function statusText() {
+        if (root.sitlHeartbeatSeen) return qsTr("PX4 SITL active")
+        if (linkVm.serialConnected) return qsTr("Serial active")
+        if (root.udpListeningOnly) return qsTr("UDP listening")
+        return qsTr("Mock ready")
+    }
+
+    function statusColor() {
+        if (root.anyRealLink) return "#10A37F"
+        if (root.udpListeningOnly) return "#FFC107"
+        return "#8e8ea0"
+    }
 
     // ---- top minimal header (no harsh background) -----------------------
     RowLayout {
@@ -59,19 +75,22 @@ Rectangle {
             Layout.preferredHeight: 26
             Layout.preferredWidth: chipLabel.implicitWidth + 22
             radius: 13
-            color: root.anyRealLink ? "#1f3b1f" : "#2f2f2f"
-            border.color: root.anyRealLink ? "#3f6f3f" : "#3f3f46"
+            color: root.anyRealLink ? "#1f3b1f"
+                                     : (root.udpListeningOnly ? "#3a321d" : "#2f2f2f")
+            border.color: root.anyRealLink ? "#3f6f3f"
+                                           : (root.udpListeningOnly ? "#7a641c" : "#3f3f46")
             RowLayout {
                 anchors.centerIn: parent
                 spacing: 6
                 Rectangle {
                     width: 6; height: 6; radius: 3
-                    color: root.anyRealLink ? "#10A37F" : "#8e8ea0"
+                    color: root.statusColor()
                 }
                 Label {
                     id: chipLabel
-                    text: root.anyRealLink ? qsTr("Link active") : qsTr("No link . will use Mock")
-                    color: root.anyRealLink ? "#9be6c2" : "#8e8ea0"
+                    text: root.statusText()
+                    color: root.anyRealLink ? "#9be6c2"
+                                            : (root.udpListeningOnly ? "#ffd866" : "#8e8ea0")
                     font.pixelSize: 11
                 }
             }
@@ -208,9 +227,13 @@ Rectangle {
                 Layout.fillWidth: true
                 color: "#8e8ea0"
                 font.pixelSize: 12
-                text: root.anyRealLink
-                      ? qsTr("Connected. You can continue.")
-                      : qsTr("No real link opened. Continuing will use the Mock vehicle.")
+                text: root.sitlHeartbeatSeen
+                      ? qsTr("PX4 SITL heartbeat received. You can continue.")
+                      : (linkVm.serialConnected
+                         ? qsTr("Hardware telemetry link active. Commands remain disabled.")
+                         : (root.udpListeningOnly
+                            ? qsTr("UDP listener is open. Waiting for SITL heartbeat.")
+                            : qsTr("No real link opened. Continuing will use the Mock vehicle.")))
             }
 
             Rectangle {

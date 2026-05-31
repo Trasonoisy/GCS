@@ -179,6 +179,9 @@ void LinkViewModel::onSerialError(const QString& msg)
 void LinkViewModel::onBytesIn(int n)
 {
     m_bytesIn += n;
+    if (!m_peerSeen) {
+        refreshState();
+    }
     emit statsChanged();
 }
 

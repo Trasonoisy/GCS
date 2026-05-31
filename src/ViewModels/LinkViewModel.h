@@ -95,6 +95,8 @@ private slots:
     void refreshState();
     void onUdpError(const QString& msg);
     void onSerialError(const QString& msg);
+
+public slots:
     void onBytesIn(int n);
     void onUnknownMsg(int sysid, int compid, int msgid);
 
