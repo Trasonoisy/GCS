@@ -59,16 +59,20 @@ Steps:
 9. Upload to `PX4 SITL (UDP)` or `ArduPilot SITL (UDP)`.
 10. Download from the same target.
 11. Show transfer progress and status messages.
-12. Open the Event Log and show the recorded link, vehicle, validation, and
-    mission transfer events.
+12. Open Manual.
+13. Connect the mock joystick, enable manual control, move sliders, and show
+    `MAVLink MANUAL_CONTROL (SITL MAVLink)` plus increasing sample count.
+14. Open the Event Log and show the recorded link, vehicle, validation,
+    mission transfer, and manual-control events.
 
 Required safety statement during demo:
 
 - SITL mission transfer sends mission protocol data only.
 - It does not arm, take off, change flight mode, start the mission, land, or
   RTL.
-- Manual control in SITL is a logged stub in this MVP; no real
-  `MANUAL_CONTROL` MAVLink frame is transmitted.
+- Manual control in SITL sends `MANUAL_CONTROL` samples only after the
+  operator enables it and SafetyGate allows the session.
+- Serial/real-hardware manual control remains blocked/read-only.
 
 ## Scenario 3: SafetyGate Blocked-Command Demo
 

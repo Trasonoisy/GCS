@@ -90,6 +90,8 @@ set(GCS_CORE_SOURCES
     Manual/ManualControlState.h
     Manual/ManualControlManager.h
     Manual/ManualControlManager.cpp
+    Manual/MavlinkManualControlSink.h
+    Manual/MavlinkManualControlSink.cpp
     Manual/SitlStubManualControlSink.h
     Manual/SitlStubManualControlSink.cpp
 

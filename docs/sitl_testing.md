@@ -1,8 +1,8 @@
 # SITL Testing
 
 This document explains how to demonstrate and test Lab GCS with PX4 SITL and
-ArduPilot SITL. SITL support is for telemetry and mission upload/download only.
-It does not enable real drone commands.
+ArduPilot SITL. SITL support covers telemetry, mission upload/download, and
+manual-control sample streaming. It does not enable real-drone commands.
 
 ## Safety Scope
 
@@ -11,7 +11,7 @@ Allowed in SITL:
 - Receive heartbeat, position, attitude, GPS, battery, VFR HUD, and status text.
 - Show PX4 or ArduPilot vehicle state in the UI.
 - Upload and download missions through the MAVLink mission protocol.
-- Exercise the manual-control framework through a logged SITL stub.
+- Exercise manual-control samples through MAVLink `MANUAL_CONTROL` on UDP SITL.
 
 Not allowed:
 
@@ -22,7 +22,7 @@ Not allowed:
 - Mission start.
 - Force-arm.
 - RC override.
-- Real MAVLink `MANUAL_CONTROL` transmission.
+- Serial/real-hardware MAVLink `MANUAL_CONTROL` transmission.
 
 ## App Setup
 
@@ -124,9 +124,24 @@ rejection. Only `MISSION_ITEM_INT` is supported.
 ## Manual Control in SITL
 
 The Manual tab can show joystick normalization, packed values, and watchdog
-state. For SITL vehicles, manual-control samples are delivered to
-`SitlStubManualControlSink`. This sink is intentionally a stub: it logs and
-stores sample information but does not send MAVLink `MANUAL_CONTROL` bytes.
+state. For UDP SITL vehicles, manual-control samples are delivered to
+`MavlinkManualControlSink`, which sends MAVLink `MANUAL_CONTROL` frames to the
+observed SITL peer.
+
+Verification workflow:
+
+1. Connect Lab GCS to PX4/ArduPilot SITL over UDP.
+2. Open Manual.
+3. Click `Connect mock joystick`.
+4. Click `Enable`.
+5. Move the sliders and confirm:
+   - Sink label shows `MAVLink MANUAL_CONTROL (SITL MAVLink)`.
+   - Sample count increases.
+   - PX4/ArduPilot MAVLink status shows incoming bytes on the matching link.
+
+This does not arm, take off, land, RTL, change mode, or start a mission.
+PX4 may still require a joystick-enabled `COM_RC_IN_MODE` setting before it
+uses manual inputs for vehicle motion.
 
 ## Troubleshooting
 

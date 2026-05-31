@@ -24,7 +24,7 @@ void SitlStubManualControlSink::onManualControlSample(
 
     if (!m_vehicle) return;
     m_vehicle->appendEvent(QStringLiteral(
-        "[MANUAL stub] x=%1 y=%2 z=%3 r=%4 (no MAVLink sent - Phase 4 stub)")
+        "[MANUAL stub] x=%1 y=%2 z=%3 r=%4 (no MAVLink sent)")
         .arg(x).arg(y).arg(z).arg(r));
 }
 

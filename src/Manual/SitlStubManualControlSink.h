@@ -9,13 +9,11 @@ namespace gcs::vehicle { class Vehicle; }
 
 namespace gcs::manual {
 
-// Logged-only manual-control sink used when the active vehicle is PX4 or
-// ArduPilot SITL.
+// Logged-only manual-control sink for unsupported development transports.
 //
 // SAFETY: This sink deliberately does NOT pack or transmit MAVLink
-// MANUAL_CONTROL. The brief permits a "safe stub/logging path" for Phase 4.
-// Real MAVLink transmission lands in Phase 5+ behind the existing SafetyGate
-// and a vetted MavCommandQueue.
+// MANUAL_CONTROL. UDP/TCP SITL uses MavlinkManualControlSink; serial hardware
+// gets no manual-control sink at all.
 class SitlStubManualControlSink : public QObject, public IManualControlSink
 {
     Q_OBJECT

@@ -29,6 +29,8 @@ This page lists what the current GCS MVP can actually do.
 - PX4 flight modes are decoded by `PX4FirmwarePlugin`.
 - SITL mission upload/download uses `MavlinkMissionLink`.
 - Mission transfer is data-only and does not start or control the vehicle.
+- Manual-control samples can be sent as MAVLink `MANUAL_CONTROL` over UDP SITL
+  when SafetyGate allows the session.
 
 ## ArduPilot SITL
 
@@ -39,6 +41,7 @@ This page lists what the current GCS MVP can actually do.
 - ArduPilot mode names are decoded by firmware-specific plugins.
 - SITL mission upload/download uses the same mission manager and SafetyGate
   policy as PX4 SITL.
+- UDP SITL manual-control samples use the same `MANUAL_CONTROL` sink path.
 
 ## Mission Planning
 
@@ -57,9 +60,10 @@ This page lists what the current GCS MVP can actually do.
 - Manual-control state machine and watchdog.
 - SafetyGate checks before activation and before each sample.
 - Mock vehicle sink.
-- SITL logged stub sink.
+- UDP SITL MAVLink `MANUAL_CONTROL` sink.
+- Stub sink only for unsupported development transports.
 
-No real MAVLink `MANUAL_CONTROL` packet is transmitted in this MVP.
+No serial/real-hardware `MANUAL_CONTROL` packet is transmitted in this MVP.
 
 ## SafetyGate
 

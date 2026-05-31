@@ -34,6 +34,7 @@ gcs_add_test(tst_axis_mapper            Manual/tst_axis_mapper.cpp)
 gcs_add_test(tst_mock_joystick          Manual/tst_mock_joystick.cpp)
 gcs_add_test(tst_safety_gate            Safety/tst_safety_gate.cpp)
 gcs_add_test(tst_manual_control_manager Manual/tst_manual_control_manager.cpp)
+gcs_add_test(tst_mavlink_manual_control_sink Manual/tst_mavlink_manual_control_sink.cpp)
 
 # Phase 5
 gcs_add_test(tst_mav_type                Firmware/tst_mav_type.cpp)

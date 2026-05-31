@@ -64,7 +64,7 @@ QML Manual View
   -> AxisMapper
   -> ManualControlManager
   -> SafetyGate.canStartManualControl / canContinueManualControl
-  -> MockVehicle or SitlStubManualControlSink
+  -> MockVehicle or MavlinkManualControlSink (UDP SITL)
 ```
 
 Real-hardware serial flow is read-only:
@@ -90,7 +90,7 @@ SerialLink write bytes
 | `Vehicle` | `Vehicle`, `VehicleState`, `VehicleStateStore`, `MultiVehicleManager` | Own per-vehicle state and active-vehicle selection. |
 | `Firmware` | `FirmwarePlugin`, `PX4FirmwarePlugin`, `ArduPilotFirmwarePlugin`, Ardu* subclasses | Isolate PX4/ArduPilot mode naming, airframe handling, and mission policy. |
 | `Mission` | `MissionPlan`, `MissionItem`, `MissionValidator`, `MissionManager`, `MavlinkMissionLink` | Mission model, validation, `.plan` I/O, upload/download state machines. |
-| `Manual` | `MockJoystickBackend`, `AxisMapper`, `ManualControlManager`, `SitlStubManualControlSink` | Normalize joystick input, watchdog manual-control state, deliver only mock/stub samples. |
+| `Manual` | `MockJoystickBackend`, `AxisMapper`, `ManualControlManager`, `MavlinkManualControlSink`, `SitlStubManualControlSink` | Normalize joystick input, watchdog manual-control state, deliver mock samples and UDP SITL MAVLink manual-control samples. |
 | `Safety` | `SafetyGate`, `SafetyDecision` | Central allow/block service for dangerous operations. |
 | `Logging` | `EventLogger`, `MemoryLogSink`, `FileLogSink`, `OperatorActionLogger` | Structured JSONL event logging and UI log buffer. |
 | `Simulation` | `MockVehicle`, `MockMissionLink` | Hardware-free telemetry and mission testing. |
@@ -105,6 +105,7 @@ The MVP is MAVLink-based, but scoped:
 - `MAVLinkMessageRouter` creates or updates vehicles from heartbeats and
   routes supported messages into `Vehicle`.
 - `MavlinkMissionLink` sends and receives the mission protocol for SITL only.
+- `MavlinkManualControlSink` sends `MANUAL_CONTROL` frames for UDP SITL only.
 - `MissionUploader` uses `MISSION_COUNT`, waits for `MISSION_REQUEST_INT`,
   sends `MISSION_ITEM_INT`, and waits for `MISSION_ACK`.
 - `MissionDownloader` sends `MISSION_REQUEST_LIST`, receives count/items,

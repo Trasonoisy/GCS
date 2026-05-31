@@ -32,6 +32,7 @@ quint8 crcExtraForMessage(int msgid)
         case msgid::GpsRawInt:          return 24;
         case msgid::Attitude:           return 39;
         case msgid::GlobalPositionInt:  return 104;
+        case msgid::ManualControl:      return 243;
         case msgid::VfrHud:             return 20;
         case msgid::BatteryStatus:      return 154;
         case msgid::Statustext:         return 83;
@@ -231,6 +232,17 @@ bool decodeStatustext(const QByteArray& p, Statustext& out)
     return true;
 }
 
+bool decodeManualControl(const QByteArray& p, ManualControl& out)
+{
+    out.x       = readLE<qint16>(p, 0);
+    out.y       = readLE<qint16>(p, 2);
+    out.z       = readLE<qint16>(p, 4);
+    out.r       = readLE<qint16>(p, 6);
+    out.buttons = readLE<quint16>(p, 8);
+    out.target  = readLE<quint8>(p, 10);
+    return true;
+}
+
 // ---------- Phase 8: mission-protocol decoders ----------
 
 bool decodeMissionCount(const QByteArray& p, MissionCount& out)
@@ -300,6 +312,18 @@ void appendLE(QByteArray& out, T value)
     out.append(buf, n);
 }
 } // namespace
+
+QByteArray encodeManualControl(const ManualControl& in)
+{
+    QByteArray p; p.reserve(11);
+    appendLE<qint16> (p, in.x);
+    appendLE<qint16> (p, in.y);
+    appendLE<qint16> (p, in.z);
+    appendLE<qint16> (p, in.r);
+    appendLE<quint16>(p, in.buttons);
+    appendLE<quint8> (p, in.target);
+    return p;
+}
 
 QByteArray encodeMissionCount(const MissionCount& in)
 {

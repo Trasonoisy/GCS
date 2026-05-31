@@ -16,6 +16,7 @@ constexpr int SysStatus          = 1;
 constexpr int GpsRawInt          = 24;
 constexpr int Attitude           = 30;
 constexpr int GlobalPositionInt  = 33;
+constexpr int ManualControl      = 69;
 constexpr int VfrHud             = 74;
 constexpr int BatteryStatus      = 147;
 constexpr int Statustext         = 253;
@@ -127,6 +128,17 @@ struct Statustext {
     QString text;
 };
 
+// MAVLink MANUAL_CONTROL (69). Phase 4 uses the minimum 11-byte payload;
+// extension axes and buttons2 stay unused.
+struct ManualControl {
+    int16_t  x       = 0;
+    int16_t  y       = 0;
+    int16_t  z       = 0;
+    int16_t  r       = 0;
+    uint16_t buttons = 0;
+    uint8_t  target  = 0;
+};
+
 // Phase 8: mission-protocol messages. We deliberately model only the v1
 // (non-extension) fields here — mission_type / opaque_id are reserved values
 // in the lab build (always 0 = MISSION_TYPE_MISSION).
@@ -179,6 +191,7 @@ bool decodeGlobalPositionInt(const QByteArray& payload, GlobalPositionInt& out);
 bool decodeVfrHud           (const QByteArray& payload, VfrHud& out);
 bool decodeBatteryStatus    (const QByteArray& payload, BatteryStatus& out);
 bool decodeStatustext       (const QByteArray& payload, Statustext& out);
+bool decodeManualControl    (const QByteArray& payload, ManualControl& out);
 
 // Phase 8 decoders.
 bool decodeMissionCount       (const QByteArray& payload, MissionCount& out);
@@ -190,6 +203,7 @@ bool decodeMissionRequestList (const QByteArray& payload, MissionRequestList& ou
 // Phase 8 payload encoders. Each returns the wire-format payload bytes for
 // the named message in MAVLink common-dialect field order. Wrap the result
 // with buildV2Frame() to obtain a complete frame.
+QByteArray encodeManualControl    (const ManualControl& in);
 QByteArray encodeMissionCount       (const MissionCount& in);
 QByteArray encodeMissionRequestInt  (const MissionRequestInt& in);
 QByteArray encodeMissionItemInt     (const MissionItemInt& in);

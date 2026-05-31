@@ -10,7 +10,7 @@ This plan follows the project brief and records the current MVP status.
 | 1 | Mock vehicle and basic UI | Complete. Mock telemetry appears in Fly view. |
 | 2 | Mission planning against mock | Complete. Mission model, validation, `.plan` I/O, mock upload/download. |
 | 3 | PX4 SITL telemetry | Complete. UDP listener, MAVLink telemetry decode, PX4 mode names. |
-| 4 | Manual control and SafetyGate | Complete as framework. Mock samples and SITL stub only. |
+| 4 | Manual control and SafetyGate | Complete for mock and UDP SITL. Sends MAVLink `MANUAL_CONTROL` to SITL only; hardware remains blocked/read-only. |
 | 5 | ArduPilot SITL parity | Complete. ArduPilot heartbeat, airframe plugins, mode naming. |
 | 6 | Logging | Complete. Structured JSONL event logging. Replay not implemented. |
 | 7 | HITL preparation | Complete as read-only telemetry. Serial writes blocked. |
@@ -26,7 +26,8 @@ The current MVP demonstrates:
 - Mission planning, validation, save/load, upload, and download.
 - Mock mission transfer.
 - SITL mission upload/download through MAVLink mission protocol.
-- Manual-control framework with joystick normalization and watchdog.
+- Manual-control framework with joystick normalization, watchdog, and UDP SITL
+  MAVLink `MANUAL_CONTROL` output.
 - SafetyGate enforcement.
 - Structured logging.
 - Hardware read-only serial telemetry.

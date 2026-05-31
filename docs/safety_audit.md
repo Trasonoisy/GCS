@@ -1,14 +1,15 @@
 # SafetyGate Audit Summary
 
-Date: 2026-05-20
+Date: 2026-05-31
 
-Scope: Phase 8 integration testing and safety audit. No new drone-control
-features were enabled.
+Scope: Phase 8 integration testing plus Phase 4 UDP SITL manual-control
+completion. SITL manual-control samples are now transmitted as MAVLink
+`MANUAL_CONTROL`; real-hardware control paths remain disabled.
 
 ## Result
 
-PASS. The project builds, the app starts, all tests pass, and no real command
-path is enabled.
+PASS. The project builds, the app starts, SITL/manual tests pass, and no real
+hardware command path is enabled.
 
 ## Verified Phase Coverage
 
@@ -20,7 +21,7 @@ path is enabled.
 | Mission Planning | Mission model, validator, `.plan` save/load, and PlanView actions remain intact. |
 | Mock mission upload/download | `MockMissionLink` and mission manager upload/download tests pass. |
 | SITL mission upload/download | `MavlinkMissionLink` supports mission upload/download over UDP/TCP SITL only. |
-| Manual Control framework | Mock joystick, axis mapping, manager watchdog, SafetyGate checks, and SITL stub path pass. |
+| Manual Control framework | Mock joystick, axis mapping, manager watchdog, SafetyGate checks, mock sink, and UDP SITL MAVLink sink pass. |
 | SafetyGate | Blocks real-hardware mission/manual paths and all unimplemented dangerous actions. |
 | Logging | Memory/file/event/operator logging tests pass; default file path now falls back safely. |
 | Hardware Read-Only mode | Serial opens read-only, shows hardware banner, and refuses outbound bytes. |
@@ -39,20 +40,22 @@ path is enabled.
 | Real hardware mission upload | `MissionViewModel::uploadToVehicle` plus `SafetyGate::canUploadMission`; serial vehicles receive no `MissionManager`. | Blocked on `LinkKind::Serial`; QML upload button disabled as an additional guard. |
 | Real hardware mission download | `MissionViewModel::downloadFromVehicle`; serial vehicles receive no `MissionManager`. | Blocked on `LinkKind::Serial`; QML download button disabled as an additional guard. |
 | Real hardware manual control | `ManualControlManager` calls `SafetyGate::canStartManualControl` and `canContinueManualControl`. | Blocked on `LinkKind::Serial`; no real-hardware manual sink exists. |
-| MAVLink MANUAL_CONTROL to SITL | `ManualControlManager` uses `SitlStubManualControlSink` for SITL. | Logged/stubbed only; no MAVLink MANUAL_CONTROL frame is transmitted. |
+| MAVLink MANUAL_CONTROL to SITL | `ManualControlManager` uses `MavlinkManualControlSink` for UDP SITL. | Allowed only for SITL network links after SafetyGate permits the session. |
 
 ## Audit Notes
 
 - `SerialLink::writeBytes` refuses every outbound byte and emits an error.
-- `UdpLink::writeBytes` is used only by `MavlinkMissionLink` for SITL mission
-  protocol after SafetyGate approval.
+- `UdpLink::writeBytes` is used by `MavlinkMissionLink` for SITL mission
+  protocol and by `MavlinkManualControlSink` for SITL manual samples after
+  SafetyGate approval.
 - `MavlinkMissionLink` sends only mission protocol frames:
   `MISSION_COUNT`, `MISSION_ITEM_INT`, `MISSION_REQUEST_LIST`,
   `MISSION_REQUEST_INT`, and `MISSION_ACK`.
 - No `COMMAND_LONG`, arming, takeoff, landing, RTL, force-arm, mission-start,
   or `RC_CHANNELS_OVERRIDE` sender was found in `src`, `tests`, or `qml`.
-- Manual control remains either simulated (`MockVehicle`) or logged through
-  `SitlStubManualControlSink`; serial hardware is blocked by SafetyGate.
+- Manual control remains either simulated (`MockVehicle`) or UDP SITL-only in
+  the current UI (`MavlinkManualControlSink` refuses non-network links);
+  serial hardware is blocked by SafetyGate and receives no sink.
 
 ## Verification
 
@@ -62,14 +65,22 @@ Build:
 & 'C:\QtOnline\Tools\CMake_64\bin\cmake.exe' --build build
 ```
 
-Tests:
+Targeted tests:
 
 ```powershell
 $env:Path = 'C:\QtOnline\6.11.1\mingw_64\bin;C:\QtOnline\Tools\mingw1310_64\bin;' + $env:Path
-& 'C:\QtOnline\Tools\CMake_64\bin\ctest.exe' --test-dir build --output-on-failure
+.\build\tst_axis_mapper.exe
+.\build\tst_manual_control_manager.exe
+.\build\tst_safety_gate.exe
+.\build\tst_safety_gate_hardware_mode.exe
+.\build\tst_mavlink_manual_control_sink.exe
+.\build\tst_mavlink_parser.exe
+.\build\tst_mavlink_mission_codec.exe
+.\build\tst_mavlink_mission_link.exe
+.\build\tst_safety_gate_mission_sitl.exe
 ```
 
-Result: 32/32 tests passed.
+Result: targeted tests passed.
 
 App launch smoke test:
 

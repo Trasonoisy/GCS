@@ -57,8 +57,8 @@ Manual control is a framework, not real flight control.
 Limitations:
 
 - Real joystick hardware backends such as SDL are not implemented.
-- SITL manual control uses a logged stub.
-- No real MAVLink `MANUAL_CONTROL` stream is transmitted.
+- UDP SITL manual control uses MAVLink `MANUAL_CONTROL`, but only with the
+  mock joystick backend.
 - No real-hardware sink exists.
 - Buttons are not mapped to commands.
 
@@ -96,7 +96,7 @@ Recommended sequence:
 1. Integrate MAVLink `c_library_v2` and broaden protocol tests.
 2. Add raw telemetry logging and replay as a read-only diagnostic path.
 3. Add stronger PX4 and ArduPilot SITL smoke scripts.
-4. Add real joystick backend while keeping SITL/manual output stubbed.
+4. Add real joystick backend while keeping output limited to SITL.
 5. Design and test a command queue for real command ACK/retry/backoff.
 6. Add operator confirmations and emergency procedures.
 7. Add HITL command testing with propellers removed.

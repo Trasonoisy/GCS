@@ -22,6 +22,26 @@ Rectangle {
         }
     }
 
+    function sinkDecoratedLabel() {
+        if (manualVm.sinkSimulated)
+            return manualVm.sinkLabel + qsTr(" (simulation)")
+        if (manualVm.sinkLabel.indexOf("MANUAL_CONTROL") >= 0)
+            return manualVm.sinkLabel + qsTr(" (SITL MAVLink)")
+        if (manualVm.sinkLabel.indexOf("SITL-stub") >= 0)
+            return manualVm.sinkLabel + qsTr(" (stub, no MAVLink sent)")
+        return manualVm.sinkLabel
+    }
+
+    function sinkColor() {
+        if (manualVm.sinkSimulated)
+            return "#A0E060"
+        if (manualVm.sinkLabel.indexOf("MANUAL_CONTROL") >= 0)
+            return "#7FB7E0"
+        if (manualVm.sinkLabel.indexOf("SITL-stub") >= 0)
+            return "#FFAA33"
+        return "#9A9A9A"
+    }
+
     ScrollView {
         id: manualScroll
         anchors.fill: parent
@@ -47,7 +67,7 @@ Rectangle {
                 Label {
                     anchors.centerIn: parent
                     width: parent.width - 20
-                    text: qsTr("Manual control framework only. MockVehicle consumes samples; SITL uses a logged stub; hardware control is disabled.")
+                    text: qsTr("Manual control is enabled for MockVehicle and UDP SITL only. Serial hardware remains read-only.")
                     color: "white"
                     font.bold: true
                     font.pixelSize: 12
@@ -90,10 +110,8 @@ Rectangle {
                             Layout.fillWidth: true
                             Label { text: qsTr("Sink"); color: "#9A9A9A"; Layout.preferredWidth: 110 }
                             Label {
-                                text: manualVm.sinkLabel
-                                      + (manualVm.sinkSimulated ? qsTr(" (simulation)")
-                                                                : qsTr(" (stub, no MAVLink sent)"))
-                                color: manualVm.sinkSimulated ? "#A0E060" : "#FFAA33"
+                                text: root.sinkDecoratedLabel()
+                                color: root.sinkColor()
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }
@@ -385,7 +403,7 @@ Rectangle {
                         spacing: 8
 
                         Label {
-                            text: qsTr("Display only in this MVP. SITL sink is logged; hardware sink does not exist.")
+                            text: qsTr("These values are sent as MAVLink MANUAL_CONTROL only when the active vehicle is UDP SITL.")
                             color: "#FFAA33"
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true

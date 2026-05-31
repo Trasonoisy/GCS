@@ -5,17 +5,18 @@
 
 namespace gcs::manual {
 
-// Where a ManualControlManager delivers each MANUAL_CONTROL sample. Two
-// concrete sinks exist in Phase 4:
-//   1. MockManualControlSink (in src/Simulation) — pushes the sample into
-//      MockVehicle's last-sample slot for tests and UI display.
-//   2. SitlStubManualControlSink (defined inline below) — logs the values
-//      without writing any bytes. The brief explicitly permits this for
-//      Phase 4; the wire-level MAVLink path is intentionally NOT enabled.
+// Where a ManualControlManager delivers each MANUAL_CONTROL sample.
+// Concrete sinks in this build:
+//   1. MockVehicle (in src/Simulation) stores the latest sample for tests
+//      and UI display.
+//   2. MavlinkManualControlSink emits MAVLink MANUAL_CONTROL for UDP/TCP
+//      SITL only.
+//   3. SitlStubManualControlSink is a fallback logger for unsupported
+//      development transports.
 //
-// SAFETY: A real-hardware sink does NOT exist in this build. Adding one
-// must coincide with full SafetyGate + watchdog plumbing and a security
-// review (Phase 5+).
+// SAFETY: A serial/real-hardware sink does NOT exist in this build. Adding
+// one must coincide with full SafetyGate + watchdog plumbing and a security
+// review.
 class IManualControlSink
 {
 public:

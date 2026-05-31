@@ -15,6 +15,7 @@
 #include "Logging/OperatorActionLogger.h"
 #include "Manual/IManualControlSink.h"
 #include "Manual/ManualControlManager.h"
+#include "Manual/MavlinkManualControlSink.h"
 #include "Manual/MockJoystickBackend.h"
 #include "Manual/SitlStubManualControlSink.h"
 #include "Mission/MavlinkMissionLink.h"
@@ -333,14 +334,27 @@ int main(int argc, char* argv[])
     auto* manual   = new gcs::manual::ManualControlManager(joystick, &gate, &app);
 
     auto rebindManual =
-        [manual, mockVehicle](gcs::vehicle::Vehicle* v) {
+        [manual, mockVehicle, linkMgr](gcs::vehicle::Vehicle* v) {
             manual->setActiveVehicle(v);
             if (!v) { manual->setSink(nullptr); return; }
             if (v == mockVehicle->vehicle()) {
                 manual->setSink(mockVehicle);
             } else {
-                auto* stub = new gcs::manual::SitlStubManualControlSink(v, v);
-                manual->setSink(stub);
+                const auto& state = v->stateStore()->state();
+                if (state.linkKind == gcs::comms::LinkKind::Udp
+                    && linkMgr->udpLink()
+                    && linkMgr->udpLink()->isConnected()) {
+                    auto* sink = new gcs::manual::MavlinkManualControlSink(
+                        v->systemId(), linkMgr->udpLink(),
+                        /*gcsSystemId*/255, /*gcsComponentId*/190,
+                        v, v);
+                    manual->setSink(sink);
+                } else if (state.linkKind == gcs::comms::LinkKind::Tcp) {
+                    auto* stub = new gcs::manual::SitlStubManualControlSink(v, v);
+                    manual->setSink(stub);
+                } else {
+                    manual->setSink(nullptr);
+                }
             }
         };
     QObject::connect(multi, &gcs::vehicle::MultiVehicleManager::activeVehicleChanged,

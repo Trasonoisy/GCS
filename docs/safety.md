@@ -97,7 +97,7 @@ The following are intentionally disabled:
 | RC override | No `RC_CHANNELS_OVERRIDE` implementation exists. |
 | Real hardware mission upload | Blocked by missing serial mission manager and SafetyGate. |
 | Real hardware manual control | Blocked by SafetyGate and absence of real hardware sink. |
-| Real MAVLink MANUAL_CONTROL transmission | Not implemented; SITL uses a logged stub. |
+| Serial/hardware MAVLink MANUAL_CONTROL transmission | Not implemented; only UDP/TCP SITL network links can receive manual samples. |
 
 ## Mission Safety
 
@@ -126,9 +126,10 @@ Disabled -> WaitingForJoystick -> Ready -> Active
 ```
 
 The manager checks SafetyGate before activation and before every sample. Mock
-vehicle samples are consumed by `MockVehicle`. SITL samples go to
-`SitlStubManualControlSink`, which logs/stores state but does not write a
-MAVLink `MANUAL_CONTROL` packet.
+vehicle samples are consumed by `MockVehicle`. UDP SITL samples go to
+`MavlinkManualControlSink`, which writes MAVLink `MANUAL_CONTROL` frames only
+to network SITL links. Serial hardware gets no manual-control sink and is
+blocked by SafetyGate.
 
 Joystick buttons are stored only as a bitmask. They are not mapped to arm,
 takeoff, mode changes, RTL, or any other dangerous command.
