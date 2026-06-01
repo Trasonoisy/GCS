@@ -107,7 +107,8 @@ void TestArdupilotModes::rcChannelsOverrideStaysDisabled()
 
 void TestArdupilotModes::supportedMissionCommandsRemainsEmpty()
 {
-    // SAFETY: real ArduPilot mission upload is not enabled in this phase.
+    // Phase 5 keeps the ArduPilot command whitelist empty so validation
+    // warns instead of pretending we have a complete firmware command table.
     QVERIFY(ArduCopterFirmwarePlugin().supportedMissionCommands().isEmpty());
     QVERIFY(ArduPlaneFirmwarePlugin().supportedMissionCommands().isEmpty());
 }

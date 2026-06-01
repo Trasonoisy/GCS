@@ -36,6 +36,7 @@ quint8 crcExtraForMessage(int msgid)
         case msgid::VfrHud:             return 20;
         case msgid::BatteryStatus:      return 154;
         case msgid::Statustext:         return 83;
+        case msgid::MissionRequest:     return 230;
         case msgid::MissionRequestList: return 132;
         case msgid::MissionCount:       return 221;
         case msgid::MissionAck:         return 153;

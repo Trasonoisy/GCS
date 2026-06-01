@@ -65,6 +65,7 @@ class TestMavlinkMissionLink : public QObject
 private slots:
     void initTestCase();
     void uploadThreeWaypointsAcrossLoop();
+    void uploadThreeWaypointsWithDeprecatedMissionRequest();
     void downloadEmptyMission();
     void downloadThreeWaypoints();
     void uploadAckRejectFailsClean();
@@ -125,6 +126,7 @@ public:
 
     void setStoredItems(QList<MissionItem> items) { m_storedItems = std::move(items); }
     void setAckResultOverride(int result)         { m_ackOverride = result; }
+    void setUseDeprecatedMissionRequest(bool use)  { m_deprecatedMissionRequest = use; }
     int  receivedCount()  const                   { return m_expectedCount; }
     int  receivedItems()  const                   { return m_receivedCount; }
 
@@ -193,7 +195,9 @@ private:
         r.seq              = static_cast<uint16_t>(seq);
         r.target_system    = 255;
         r.target_component = 190;
-        sendFrame(gcs::protocol::msgid::MissionRequestInt,
+        sendFrame(m_deprecatedMissionRequest
+                    ? gcs::protocol::msgid::MissionRequest
+                    : gcs::protocol::msgid::MissionRequestInt,
                   gcs::protocol::msg::encodeMissionRequestInt(r));
     }
     void sendAck(int result)
@@ -217,6 +221,7 @@ private:
     int m_expectedCount = 0;
     int m_receivedCount = 0;
     int m_ackOverride   = -1;
+    bool m_deprecatedMissionRequest = false;
     QList<MissionItem> m_storedItems;
 };
 
@@ -236,6 +241,33 @@ void TestMavlinkMissionLink::uploadThreeWaypointsAcrossLoop()
     apProto.attachLink(&apLink);
 
     FakeAutopilot ap(&apProto, &apLink, /*sysid*/1, /*compid*/1);
+
+    MavlinkMissionLink mlink(/*targetSys*/1, /*targetComp*/1, &gcsProto, &gcsLink);
+    MissionUploader up(&mlink);
+    up.setTimeoutMs(500);
+
+    QSignalSpy done(&up, &MissionUploader::completed);
+    QVERIFY(up.start(threeWaypoints()));
+    QVERIFY(done.wait(2000));
+    QCOMPARE(done.first().at(0).toBool(), true);
+    QCOMPARE(ap.receivedCount(), 3);
+    QCOMPARE(ap.receivedItems(), 3);
+}
+
+void TestMavlinkMissionLink::uploadThreeWaypointsWithDeprecatedMissionRequest()
+{
+    LoopLink gcsLink;
+    LoopLink apLink;
+    gcsLink.setPartner(&apLink);
+    apLink.setPartner(&gcsLink);
+
+    MAVLinkProtocol gcsProto;
+    MAVLinkProtocol apProto;
+    gcsProto.attachLink(&gcsLink);
+    apProto.attachLink(&apLink);
+
+    FakeAutopilot ap(&apProto, &apLink, /*sysid*/1, /*compid*/1);
+    ap.setUseDeprecatedMissionRequest(true);
 
     MavlinkMissionLink mlink(/*targetSys*/1, /*targetComp*/1, &gcsProto, &gcsLink);
     MissionUploader up(&mlink);

@@ -305,6 +305,23 @@ int main(int argc, char* argv[])
                 }
             }
         });
+    QObject::connect(linkMgr, &gcs::comms::LinkManager::udpStateChanged, &app,
+        [multi, linkMgr] {
+            auto* udp = linkMgr->udpLink();
+            if (!udp || udp->isConnected()) return;
+
+            for (auto* v : multi->vehicles()) {
+                if (!v) continue;
+                const auto& s = v->stateStore()->state();
+                if (s.linkKind != gcs::comms::LinkKind::Udp) continue;
+                if (s.linkStatus == gcs::vehicle::LinkStatus::Disconnected) continue;
+
+                v->stateStore()->updateLinkStatus(
+                    gcs::vehicle::LinkStatus::Disconnected);
+                v->appendEvent(QStringLiteral(
+                    "UDP listener stopped; link marked disconnected"));
+            }
+        });
     QObject::connect(linkMgr, &gcs::comms::LinkManager::udpError, logger,
         [logger](const QString& msg) { logger->error(Link, msg); });
 
@@ -359,6 +376,10 @@ int main(int argc, char* argv[])
         };
     QObject::connect(multi, &gcs::vehicle::MultiVehicleManager::activeVehicleChanged,
                      &app, rebindManual);
+    QObject::connect(linkMgr, &gcs::comms::LinkManager::udpStateChanged, &app,
+        [multi, rebindManual] {
+            rebindManual(multi->activeVehicle());
+        });
     rebindManual(multi->activeVehicle());
 
     QObject::connect(manual, &gcs::manual::ManualControlManager::stateChanged, logger,

@@ -88,6 +88,15 @@ void MAVLinkProtocol::handleFrame(const DecodedFrame& f)
             break;
         }
         // Phase 8: mission-protocol fan-out for SITL upload/download.
+        case msgid::MissionRequest: {
+            // ArduPilot can still emit deprecated MISSION_REQUEST during an
+            // upload transaction. MAVLink marks it as replaced by
+            // MISSION_REQUEST_INT, so surface it through the same signal.
+            msg::MissionRequestInt m;
+            msg::decodeMissionRequestInt(f.payload, m);
+            emit missionRequestIntReceived(f.sysid, f.compid, m);
+            break;
+        }
         case msgid::MissionCount: {
             msg::MissionCount m;
             msg::decodeMissionCount(f.payload, m);

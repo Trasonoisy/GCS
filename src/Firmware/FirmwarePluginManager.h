@@ -10,13 +10,10 @@ class FirmwarePlugin;
 // Factory that picks the right FirmwarePlugin for a freshly observed
 // vehicle, based on HEARTBEAT.autopilot and HEARTBEAT.type.
 //
-//   MAV_AUTOPILOT_PX4              -> PX4FirmwarePlugin
-//   MAV_AUTOPILOT_ARDUPILOTMEGA    -> ArduCopter / ArduPlane / ArduRover /
-//                                     ArduSub depending on MAV_TYPE
-//   anything else                  -> ArduPilotFirmwarePlugin (base) as a
-//                                     safe fallback — its decodeFlightMode
-//                                     returns "Mode N" so the UI still
-//                                     surfaces *something*.
+//   MAV_AUTOPILOT_PX4           -> PX4FirmwarePlugin
+//   MAV_AUTOPILOT_ARDUPILOTMEGA -> ArduCopter / ArduPlane / ArduRover /
+//                                  ArduSub depending on MAV_TYPE
+//   anything else               -> GenericFirmwarePlugin fail-closed fallback
 //
 // SAFETY: This object only chooses a decoder for telemetry. It never
 // constructs command paths.

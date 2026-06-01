@@ -23,6 +23,8 @@ private slots:
     void manualBlockedForRealHardware();
     void manualAllowedInSimulation();
     void manualAllowedInPx4Sitl();
+    void manualAllowedInArduPilotUdpSitl();
+    void manualBlockedForUnknownUdpAutopilot();
     void continueBlockedOnStaleHeartbeat();
     void otherActionsAreBlockedInThisPhase();
 };
@@ -122,6 +124,29 @@ void TestSafetyGate::manualAllowedInPx4Sitl()
     s.linkKind  = gcs::comms::LinkKind::Udp;
     const auto d = g.canStartManualControl(s, connectedStick(), true);
     QVERIFY(d.allowed);
+}
+
+void TestSafetyGate::manualAllowedInArduPilotUdpSitl()
+{
+    SafetyGate g;
+    auto s = liveSimVehicle();
+    s.simulated = false;
+    s.linkKind = gcs::comms::LinkKind::Udp;
+    s.autopilotType = QStringLiteral("ArduPilot");
+    const auto d = g.canStartManualControl(s, connectedStick(), true);
+    QVERIFY(d.allowed);
+}
+
+void TestSafetyGate::manualBlockedForUnknownUdpAutopilot()
+{
+    SafetyGate g;
+    auto s = liveSimVehicle();
+    s.simulated = false;
+    s.linkKind = gcs::comms::LinkKind::Udp;
+    s.autopilotType = QStringLiteral("unknown");
+    const auto d = g.canStartManualControl(s, connectedStick(), true);
+    QVERIFY(!d.allowed);
+    QVERIFY(d.reason.contains("Real-hardware") || d.reason.contains("disabled"));
 }
 
 void TestSafetyGate::continueBlockedOnStaleHeartbeat()

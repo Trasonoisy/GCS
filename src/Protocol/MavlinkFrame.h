@@ -21,6 +21,7 @@ constexpr int VfrHud             = 74;
 constexpr int BatteryStatus      = 147;
 constexpr int Statustext         = 253;
 // Phase 8: mission protocol messages used for SITL mission upload/download.
+constexpr int MissionRequest     = 40;
 constexpr int MissionRequestList = 43;
 constexpr int MissionCount       = 44;
 constexpr int MissionAck         = 47;

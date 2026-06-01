@@ -144,6 +144,10 @@ SafetyDecision SafetyGate::canUploadMission(
     if (plan.items.isEmpty()) {
         return SafetyDecision::block(QStringLiteral("Blocked: mission is empty."));
     }
+    if (!linkHealthy(s)) {
+        return SafetyDecision::block(QStringLiteral(
+            "Blocked: mission upload requires a connected link with a fresh heartbeat."));
+    }
     // Phase 2 mission upload runs against MockMissionLink only. Phase 7
     // additionally blocks any vehicle on a hardware transport (LinkKind ==
     // Serial) - even in simulated-flag mode this MUST NOT auto-trigger a

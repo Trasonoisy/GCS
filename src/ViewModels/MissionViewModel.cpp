@@ -1,5 +1,6 @@
 #include "MissionViewModel.h"
 
+#include <QDateTime>
 #include <QUrl>
 #include <cmath>
 
@@ -26,6 +27,14 @@ QString normalizePath(const QString& pathOrUrl)
     const QUrl url(pathOrUrl);
     if (url.isLocalFile()) return url.toLocalFile();
     return pathOrUrl;
+}
+
+bool linkFreshForTransfer(const gcs::vehicle::VehicleState& s)
+{
+    if (s.linkStatus != gcs::vehicle::LinkStatus::Connected) return false;
+    if (s.lastHeartbeatUtcMs <= 0) return false;
+    const qint64 age = QDateTime::currentMSecsSinceEpoch() - s.lastHeartbeatUtcMs;
+    return age >= 0 && age <= gcs::safety::SafetyGate::kFreshHeartbeatMs;
 }
 } // namespace
 
@@ -284,6 +293,13 @@ bool MissionViewModel::downloadFromVehicle()
         emit errorMessage(msg);
         return false;
     }
+    if (!linkFreshForTransfer(m_activeVehicle->stateStore()->state())) {
+        const QString msg = QStringLiteral(
+            "Mission download blocked: link is disconnected or heartbeat is stale.");
+        setStatus(msg);
+        emit errorMessage(msg);
+        return false;
+    }
     return m_activeManager->startDownload();
 }
 
@@ -341,6 +357,7 @@ bool MissionViewModel::transferAllowed() const
 {
     if (!m_activeManager || !m_activeVehicle) return false;
     const auto& s = m_activeVehicle->stateStore()->state();
+    if (!linkFreshForTransfer(s)) return false;
     // Mirror SafetyGate::canUploadMission, but without requiring a populated
     // plan — this is for enabling/disabling the QML buttons.
     if (s.simulated) return true;
@@ -367,6 +384,10 @@ QString MissionViewModel::transferBlockedReason() const
     if (s.linkKind == gcs::comms::LinkKind::Serial) {
         return QStringLiteral(
             "Mission transfer to real hardware is disabled; hardware mode is read-only.");
+    }
+    if (!linkFreshForTransfer(s)) {
+        return QStringLiteral(
+            "Mission transfer requires a connected link with a fresh heartbeat.");
     }
     if (transferAllowed()) return QString();
     return QStringLiteral(

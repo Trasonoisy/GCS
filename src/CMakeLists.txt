@@ -31,6 +31,8 @@ set(GCS_CORE_SOURCES
 
     Firmware/FirmwarePlugin.h
     Firmware/MavType.h
+    Firmware/GenericFirmwarePlugin.h
+    Firmware/GenericFirmwarePlugin.cpp
     Firmware/PX4FirmwarePlugin.h
     Firmware/PX4FirmwarePlugin.cpp
     Firmware/ArduPilotFirmwarePlugin.h

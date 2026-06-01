@@ -26,6 +26,8 @@ private slots:
     void uploadAllowedOnUdpPx4Sitl();
     void uploadAllowedOnUdpArdupilotSitl();
     void uploadAllowedOnTcpPx4Sitl();
+    void uploadBlockedWhenLinkDisconnected();
+    void uploadBlockedWhenHeartbeatStale();
     void uploadBlockedOnSerialEvenWithPx4Autopilot();
     void uploadBlockedOnEmptyMission();
     void uploadBlockedOnReplayLink();
@@ -87,6 +89,26 @@ void TestSafetyGateMissionSitl::uploadAllowedOnTcpPx4Sitl()
     const auto d = g.canUploadMission(
         sitlVehicle(LinkKind::Tcp, QStringLiteral("PX4")), threePoint());
     QVERIFY(d.allowed);
+}
+
+void TestSafetyGateMissionSitl::uploadBlockedWhenLinkDisconnected()
+{
+    SafetyGate g;
+    auto s = sitlVehicle(LinkKind::Udp, QStringLiteral("ArduPilot"));
+    s.linkStatus = LinkStatus::Disconnected;
+    const auto d = g.canUploadMission(s, threePoint());
+    QVERIFY(!d.allowed);
+    QVERIFY(d.reason.contains("link", Qt::CaseInsensitive));
+}
+
+void TestSafetyGateMissionSitl::uploadBlockedWhenHeartbeatStale()
+{
+    SafetyGate g;
+    auto s = sitlVehicle(LinkKind::Udp, QStringLiteral("ArduPilot"));
+    s.lastHeartbeatUtcMs -= 10'000;
+    const auto d = g.canUploadMission(s, threePoint());
+    QVERIFY(!d.allowed);
+    QVERIFY(d.reason.contains("heartbeat", Qt::CaseInsensitive));
 }
 
 void TestSafetyGateMissionSitl::uploadBlockedOnSerialEvenWithPx4Autopilot()

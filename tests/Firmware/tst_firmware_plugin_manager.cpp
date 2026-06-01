@@ -7,6 +7,7 @@
 #include "Firmware/ArduRoverFirmwarePlugin.h"
 #include "Firmware/ArduSubFirmwarePlugin.h"
 #include "Firmware/FirmwarePluginManager.h"
+#include "Firmware/GenericFirmwarePlugin.h"
 #include "Firmware/MavType.h"
 #include "Firmware/PX4FirmwarePlugin.h"
 
@@ -22,7 +23,7 @@ private slots:
     void ardupilotRoverPicksRover();
     void ardupilotSubPicksSub();
     void ardupilotUnknownAirframeFallsBackToBase();
-    void unknownAutopilotFallsBackToBase();
+    void unknownAutopilotFallsBackToGenericFailClosed();
 };
 
 namespace {
@@ -89,14 +90,18 @@ void TestFirmwarePluginManager::ardupilotUnknownAirframeFallsBackToBase()
     QVERIFY(isInstanceOf<ArduPilotFirmwarePlugin>(p));
 }
 
-void TestFirmwarePluginManager::unknownAutopilotFallsBackToBase()
+void TestFirmwarePluginManager::unknownAutopilotFallsBackToGenericFailClosed()
 {
     QObject parent;
     auto* p = FirmwarePluginManager::createForHeartbeat(
         /*MAV_AUTOPILOT_GENERIC*/ 0, /*MAV_TYPE_QUADROTOR*/ 2, &parent);
     QVERIFY(p);
     QVERIFY(!isInstanceOf<PX4FirmwarePlugin>(p));
-    QVERIFY(isInstanceOf<ArduPilotFirmwarePlugin>(p));
+    QVERIFY(!isInstanceOf<ArduPilotFirmwarePlugin>(p));
+    QVERIFY(isInstanceOf<GenericFirmwarePlugin>(p));
+    QCOMPARE(p->firmwareName(), QStringLiteral("unknown"));
+    QVERIFY(!p->manualControlPolicy().supportsManualControl);
+    QVERIFY(p->supportedMissionCommands().isEmpty());
 }
 
 QTEST_MAIN(TestFirmwarePluginManager)

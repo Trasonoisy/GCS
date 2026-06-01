@@ -5,6 +5,7 @@
 #include "ArduPlaneFirmwarePlugin.h"
 #include "ArduRoverFirmwarePlugin.h"
 #include "ArduSubFirmwarePlugin.h"
+#include "GenericFirmwarePlugin.h"
 #include "MavType.h"
 #include "PX4FirmwarePlugin.h"
 
@@ -26,15 +27,15 @@ FirmwarePlugin* FirmwarePluginManager::createForHeartbeat(uint8_t autopilot,
             case AirframeKind::Sub:    return new ArduSubFirmwarePlugin(parent);
             case AirframeKind::Other:  break;
         }
-        // Unknown ArduPilot airframe → generic ArduPilot plugin (decode
-        // falls back to "Mode N"). Still safe; nothing is sent to the wire.
+
+        // Unknown ArduPilot airframe still uses the ArduPilot family plugin,
+        // but only the base table is available so the mode label is "Mode N".
         return new ArduPilotFirmwarePlugin(parent);
     }
 
-    // MAV_AUTOPILOT_GENERIC and friends — we don't know the family, so use
-    // the ArduPilot base which gives a "Mode N" label. SafetyGate will keep
-    // manual control blocked for an unknown autopilot type.
-    return new ArduPilotFirmwarePlugin(parent);
+    // MAV_AUTOPILOT_GENERIC and friends. Unknown autopilots must not inherit
+    // ArduPilot's SITL permissions through the UI label or SafetyGate.
+    return new GenericFirmwarePlugin(parent);
 }
 
 } // namespace gcs::firmware
