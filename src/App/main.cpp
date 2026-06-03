@@ -157,6 +157,31 @@ int main(int argc, char* argv[])
     mockVeh->setMissionManager(missionMgr);
     mockVehicle->start();
 
+    QObject::connect(mockVehicle, &gcs::simulation::MockVehicle::missionPreviewStarted,
+        logger, [logger](int totalItems) {
+            logger->info(Mission,
+                QStringLiteral("Mock mission preview started (%1 items)").arg(totalItems),
+                {{QStringLiteral("totalItems"), totalItems}});
+        });
+    QObject::connect(mockVehicle, &gcs::simulation::MockVehicle::missionPreviewWaypointReached,
+        logger, [logger](int seq) {
+            logger->info(Mission,
+                QStringLiteral("Mock mission preview reached item #%1").arg(seq + 1),
+                {{QStringLiteral("seq"), seq}});
+        });
+    QObject::connect(mockVehicle, &gcs::simulation::MockVehicle::missionPreviewCompleted,
+        logger, [logger](int totalItems) {
+            logger->info(Mission,
+                QStringLiteral("Mock mission preview completed (%1 items)").arg(totalItems),
+                {{QStringLiteral("totalItems"), totalItems}});
+        });
+    QObject::connect(mockVehicle, &gcs::simulation::MockVehicle::missionPreviewStopped,
+        logger, [logger](const QString& reason) {
+            logger->warn(Mission,
+                QStringLiteral("Mock mission preview stopped: %1").arg(reason),
+                {{QStringLiteral("reason"), reason}});
+        });
+
     // Mission logging (operator-driven and result events).
     QObject::connect(missionMgr, &gcs::mission::MissionManager::uploadStarted, logger,
         [logger](int total) {
@@ -401,6 +426,7 @@ int main(int argc, char* argv[])
     // --- ViewModels --------------------------------------------------------
     auto* vehicleVm = new gcs::viewmodels::VehicleViewModel(multi, &app);
     auto* missionVm = new gcs::viewmodels::MissionViewModel(multi, &app);
+    missionVm->setMissionPreviewMockVehicle(mockVehicle);
     auto* linkVm    = new gcs::viewmodels::LinkViewModel(linkMgr, &app);
     auto* manualVm  = new gcs::viewmodels::ManualControlViewModel(manual, joystick, multi, &app);
     auto* logVm     = new gcs::viewmodels::LogViewModel(logger, memorySink, &app);

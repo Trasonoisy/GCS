@@ -10,6 +10,7 @@
 
 namespace gcs::firmware { class FirmwarePlugin; }
 namespace gcs::mission  { class MissionManager; }
+namespace gcs::simulation { class MockVehicle; }
 namespace gcs::vehicle  { class MultiVehicleManager; class Vehicle; }
 
 namespace gcs::viewmodels {
@@ -52,6 +53,11 @@ class MissionViewModel : public QObject
     Q_PROPERTY(QString      transferTarget       READ transferTarget       NOTIFY vehicleChanged)
     Q_PROPERTY(bool         transferAllowed      READ transferAllowed      NOTIFY vehicleChanged)
     Q_PROPERTY(QString      transferBlockedReason READ transferBlockedReason NOTIFY vehicleChanged)
+    Q_PROPERTY(bool         missionPreviewActive READ missionPreviewActive NOTIFY missionPreviewChanged)
+    Q_PROPERTY(bool         missionPreviewAllowed READ missionPreviewAllowed NOTIFY missionPreviewChanged)
+    Q_PROPERTY(QString      missionPreviewBlockedReason READ missionPreviewBlockedReason NOTIFY missionPreviewChanged)
+    Q_PROPERTY(QString      missionPreviewStatus READ missionPreviewStatus NOTIFY missionPreviewChanged)
+    Q_PROPERTY(double       missionPreviewProgress READ missionPreviewProgress NOTIFY missionPreviewChanged)
 
 public:
     explicit MissionViewModel(gcs::vehicle::MultiVehicleManager* manager,
@@ -82,6 +88,13 @@ public:
     QString transferTarget()       const;
     bool    transferAllowed()      const;
     QString transferBlockedReason() const;
+    bool    missionPreviewActive() const;
+    bool    missionPreviewAllowed() const;
+    QString missionPreviewBlockedReason() const;
+    QString missionPreviewStatus() const { return m_missionPreviewStatus; }
+    double  missionPreviewProgress() const { return m_missionPreviewProgress; }
+
+    void setMissionPreviewMockVehicle(gcs::simulation::MockVehicle* mockVehicle);
 
     // Methods callable from QML
     Q_INVOKABLE void addWaypoint();
@@ -98,6 +111,8 @@ public:
     Q_INVOKABLE bool uploadToVehicle();
     Q_INVOKABLE bool downloadFromVehicle();
     Q_INVOKABLE void cancelTransfer();
+    Q_INVOKABLE bool simulateMission();
+    Q_INVOKABLE void stopMissionSimulation();
 
 signals:
     void itemsChanged();
@@ -109,6 +124,8 @@ signals:
     void transferChanged();
     void statusChanged();
     void vehicleChanged();
+    void missionPreviewChanged();
+    void missionPreviewStarted();
     void infoMessage(const QString& message);
     void errorMessage(const QString& message);
 
@@ -122,6 +139,9 @@ private slots:
     void onDownloadCompleted(bool success, const QString& msg,
                              const gcs::mission::MissionPlan& plan);
     void onTransferRejected(const QString& reason);
+    void onMissionPreviewProgress(int currentIndex, int totalItems, double progress);
+    void onMissionPreviewCompleted(int totalItems);
+    void onMissionPreviewStopped(const QString& reason);
 
 private:
     QVariantMap itemToMap(const gcs::mission::MissionItem& it, int index) const;
@@ -134,6 +154,7 @@ private:
     gcs::vehicle::MultiVehicleManager* m_manager;
     gcs::vehicle::Vehicle*             m_activeVehicle = nullptr;
     gcs::mission::MissionManager*      m_activeManager = nullptr;
+    gcs::simulation::MockVehicle*      m_previewMockVehicle = nullptr;
 
     gcs::mission::MissionPlan m_plan;
     int     m_selectedIndex = -1;
@@ -149,6 +170,9 @@ private:
     int     m_transferCurrent = 0;
     int     m_transferTotal   = 0;
     QString m_statusText      = QStringLiteral("Ready");
+
+    QString m_missionPreviewStatus = QStringLiteral("Idle");
+    double  m_missionPreviewProgress = 0.0;
 };
 
 } // namespace gcs::viewmodels

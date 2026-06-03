@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Manual/IManualControlSink.h"
+#include "Mission/MissionPlan.h"
 
 namespace gcs::vehicle { class Vehicle; }
 
@@ -53,6 +54,16 @@ public:
     void stop();
     bool isRunning() const { return m_telemetryTimer.isActive(); }
 
+    // Simulation-only mission preview. This never sends MAVLink and only
+    // drives the attached MockVehicle's local telemetry.
+    bool startMissionPreview(const gcs::mission::MissionPlan& plan,
+                             double speedMps = 0.0);
+    void stopMissionPreview(const QString& reason = QStringLiteral("Stopped by operator"));
+    bool missionPreviewActive() const { return m_missionPreviewActive; }
+    int missionPreviewCurrentIndex() const { return m_previewTargetIndex; }
+    double missionPreviewProgress() const { return m_previewProgress; }
+    QString missionPreviewStatus() const { return m_previewStatus; }
+
     // Test hooks
     void simulateLostHeartbeat(int durationMs);
     void simulateLowBattery();
@@ -63,9 +74,20 @@ public:
     void tickHeartbeatNow();
     void tickTelemetryNow();
 
+signals:
+    void missionPreviewStarted(int totalItems);
+    void missionPreviewProgressChanged(int currentIndex, int totalItems, double progress);
+    void missionPreviewWaypointReached(int seq);
+    void missionPreviewCompleted(int totalItems);
+    void missionPreviewStopped(const QString& reason);
+
 private:
     void emitHeartbeat();
     void emitTelemetry();
+    void tickMissionPreview(double dt);
+    void finishMissionPreview();
+    void publishMissionPreviewState(double lat, double lon, double altM,
+                                    double speedMps, double headingDeg);
 
     gcs::vehicle::Vehicle* m_vehicle;
     std::unique_ptr<MockMissionLink> m_missionLink;
@@ -85,6 +107,14 @@ private:
     int    m_tickCount      = 0;
     double m_simLat         = m_baseLat;
     double m_simLon         = m_baseLon;
+
+    // Simulation-only mission preview state.
+    gcs::mission::MissionPlan m_previewPlan;
+    bool    m_missionPreviewActive = false;
+    int     m_previewTargetIndex   = -1;
+    double  m_previewProgress      = 0.0;
+    double  m_previewSpeedMps      = 10.0;
+    QString m_previewStatus        = QStringLiteral("Idle");
 
     // Last received manual-control sample (Phase 4).
     int16_t m_lastX = 0, m_lastY = 0, m_lastZ = 500, m_lastR = 0;

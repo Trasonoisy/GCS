@@ -9,6 +9,7 @@
 #include "Mission/MissionValidator.h"
 #include "Mission/PlanFile.h"
 #include "Safety/SafetyGate.h"
+#include "Simulation/MockVehicle.h"
 #include "Vehicle/MultiVehicleManager.h"
 #include "Vehicle/Vehicle.h"
 #include "Vehicle/VehicleStateStore.h"
@@ -46,6 +47,31 @@ MissionViewModel::MissionViewModel(gcs::vehicle::MultiVehicleManager* manager,
     connect(m_manager, &gcs::vehicle::MultiVehicleManager::activeVehicleChanged,
             this, &MissionViewModel::onActiveVehicleChanged);
     onActiveVehicleChanged(m_manager->activeVehicle());
+}
+
+void MissionViewModel::setMissionPreviewMockVehicle(
+    gcs::simulation::MockVehicle* mockVehicle)
+{
+    if (m_previewMockVehicle == mockVehicle) return;
+    if (m_previewMockVehicle) {
+        disconnect(m_previewMockVehicle, nullptr, this, nullptr);
+    }
+
+    m_previewMockVehicle = mockVehicle;
+
+    if (m_previewMockVehicle) {
+        connect(m_previewMockVehicle,
+                &gcs::simulation::MockVehicle::missionPreviewProgressChanged,
+                this, &MissionViewModel::onMissionPreviewProgress);
+        connect(m_previewMockVehicle,
+                &gcs::simulation::MockVehicle::missionPreviewCompleted,
+                this, &MissionViewModel::onMissionPreviewCompleted);
+        connect(m_previewMockVehicle,
+                &gcs::simulation::MockVehicle::missionPreviewStopped,
+                this, &MissionViewModel::onMissionPreviewStopped);
+    }
+
+    emit missionPreviewChanged();
 }
 
 QVariantList MissionViewModel::items() const
@@ -124,6 +150,7 @@ void MissionViewModel::addWaypoint()
     m_plan.items.append(it);
     markDirty();
     emit itemsChanged();
+    emit missionPreviewChanged();
     setSelectedIndex(m_plan.items.size() - 1);
 }
 
@@ -134,6 +161,7 @@ void MissionViewModel::deleteWaypoint(int index)
     m_plan.renumberSequencesInPlace();
     markDirty();
     emit itemsChanged();
+    emit missionPreviewChanged();
     if (m_selectedIndex >= m_plan.items.size()) {
         setSelectedIndex(m_plan.items.size() - 1);
     } else {
@@ -150,6 +178,7 @@ void MissionViewModel::moveWaypoint(int fromIndex, int toIndex)
     m_plan.renumberSequencesInPlace();
     markDirty();
     emit itemsChanged();
+    emit missionPreviewChanged();
     setSelectedIndex(toIndex);
 }
 
@@ -173,6 +202,7 @@ void MissionViewModel::updateWaypointField(int index,
 
     markDirty();
     emit itemsChanged();
+    emit missionPreviewChanged();
     if (index == m_selectedIndex) emit selectedItemChanged();
 }
 
@@ -183,6 +213,7 @@ void MissionViewModel::clearMission()
     setSelectedIndex(-1);
     markDirty();
     emit itemsChanged();
+    emit missionPreviewChanged();
 }
 
 void MissionViewModel::validateMission()
@@ -232,6 +263,9 @@ bool MissionViewModel::loadFromFile(const QString& path)
         emit errorMessage(r.message);
         return false;
     }
+    if (missionPreviewActive()) {
+        m_previewMockVehicle->stopMissionPreview(QStringLiteral("Mission loaded"));
+    }
     m_plan = loaded;
     m_plan.renumberSequencesInPlace();
     m_dirty = false;
@@ -241,6 +275,7 @@ bool MissionViewModel::loadFromFile(const QString& path)
     m_validationWarnings.clear();
     setSelectedIndex(m_plan.items.isEmpty() ? -1 : 0);
     emit itemsChanged();
+    emit missionPreviewChanged();
     emit dirtyChanged();
     emit currentFilePathChanged();
     emit validationChanged();
@@ -306,6 +341,65 @@ bool MissionViewModel::downloadFromVehicle()
 void MissionViewModel::cancelTransfer()
 {
     if (m_activeManager) m_activeManager->cancel(QStringLiteral("Cancelled by user"));
+}
+
+bool MissionViewModel::simulateMission()
+{
+    if (missionPreviewActive()) {
+        setStatus(QStringLiteral("Mission preview is already running."));
+        return true;
+    }
+
+    if (!missionPreviewAllowed()) {
+        const QString reason = missionPreviewBlockedReason();
+        setStatus(QStringLiteral("Mission preview blocked: %1").arg(reason));
+        emit errorMessage(reason);
+        return false;
+    }
+
+    MissionValidator v;
+    auto* fw = activeFirmware();
+    const ValidationResult r = v.validate(m_plan, fw);
+    m_validationErrors   = r.errorMessages();
+    m_validationWarnings = r.warningMessages();
+    m_validationRun      = true;
+    emit validationChanged();
+    if (!r.isValid()) {
+        const QString msg = QStringLiteral(
+            "Mission preview blocked: validation failed (%1 error(s)).")
+            .arg(m_validationErrors.size());
+        setStatus(msg);
+        emit errorMessage(msg);
+        return false;
+    }
+
+    const bool ok = m_previewMockVehicle->startMissionPreview(
+        m_plan, m_plan.cruiseSpeedMps);
+    if (!ok) {
+        const QString msg = QStringLiteral("Mission preview failed to start.");
+        setStatus(msg);
+        emit errorMessage(msg);
+        return false;
+    }
+
+    m_missionPreviewStatus = QStringLiteral("Running");
+    m_missionPreviewProgress = 0.0;
+    setStatus(QStringLiteral("Mission preview started (%1 items)")
+              .arg(m_plan.items.size()));
+    emit infoMessage(QStringLiteral("Mission preview started (%1 items)")
+                     .arg(m_plan.items.size()));
+    emit missionPreviewStarted();
+    emit missionPreviewChanged();
+    return true;
+}
+
+void MissionViewModel::stopMissionSimulation()
+{
+    if (!missionPreviewActive()) {
+        return;
+    }
+    m_previewMockVehicle->stopMissionPreview(QStringLiteral("Stopped by operator"));
+    emit infoMessage(QStringLiteral("Mission preview stopped by operator"));
 }
 
 QString MissionViewModel::vehicleLabel() const
@@ -394,15 +488,52 @@ QString MissionViewModel::transferBlockedReason() const
         "Mission transfer requires a Mock vehicle or PX4/ArduPilot SITL link.");
 }
 
+bool MissionViewModel::missionPreviewActive() const
+{
+    return m_previewMockVehicle && m_previewMockVehicle->missionPreviewActive();
+}
+
+bool MissionViewModel::missionPreviewAllowed() const
+{
+    if (!m_previewMockVehicle || !m_activeVehicle) return false;
+    if (m_activeVehicle != m_previewMockVehicle->vehicle()) return false;
+    if (m_plan.items.isEmpty()) return false;
+    const auto& s = m_activeVehicle->stateStore()->state();
+    return s.simulated && linkFreshForTransfer(s);
+}
+
+QString MissionViewModel::missionPreviewBlockedReason() const
+{
+    if (!m_previewMockVehicle) return QStringLiteral("Mock mission preview is not wired.");
+    if (!m_activeVehicle) return QStringLiteral("No active vehicle.");
+    if (m_activeVehicle != m_previewMockVehicle->vehicle()) {
+        return QStringLiteral("Mission preview is mock-only; switch to Mock vehicle first.");
+    }
+    if (m_plan.items.isEmpty()) return QStringLiteral("Add waypoints before preview.");
+    const auto& s = m_activeVehicle->stateStore()->state();
+    if (!s.simulated) return QStringLiteral("Mission preview only runs on MockVehicle.");
+    if (!linkFreshForTransfer(s)) {
+        return QStringLiteral("MockVehicle heartbeat is not fresh.");
+    }
+    return QString();
+}
+
 void MissionViewModel::onActiveVehicleChanged(gcs::vehicle::Vehicle* v)
 {
     if (m_activeManager) {
         disconnect(m_activeManager, nullptr, this, nullptr);
     }
+    if (m_previewMockVehicle
+        && v != m_previewMockVehicle->vehicle()
+        && m_previewMockVehicle->missionPreviewActive()) {
+        m_previewMockVehicle->stopMissionPreview(
+            QStringLiteral("Active vehicle changed"));
+    }
     m_activeVehicle = v;
     m_activeManager = v ? v->missionManager() : nullptr;
     rebindMissionManager();
     emit vehicleChanged();
+    emit missionPreviewChanged();
 }
 
 void MissionViewModel::rebindMissionManager()
@@ -472,6 +603,9 @@ void MissionViewModel::onDownloadCompleted(bool success, const QString& msg,
 {
     resetTransferState();
     if (success) {
+        if (missionPreviewActive()) {
+            m_previewMockVehicle->stopMissionPreview(QStringLiteral("Mission downloaded"));
+        }
         m_plan = plan;
         m_plan.renumberSequencesInPlace();
         m_dirty = false;
@@ -480,6 +614,7 @@ void MissionViewModel::onDownloadCompleted(bool success, const QString& msg,
         m_validationWarnings.clear();
         setSelectedIndex(m_plan.items.isEmpty() ? -1 : 0);
         emit itemsChanged();
+        emit missionPreviewChanged();
         emit dirtyChanged();
         emit validationChanged();
         emit infoMessage(msg);
@@ -496,8 +631,40 @@ void MissionViewModel::onTransferRejected(const QString& reason)
     emit errorMessage(reason);
 }
 
+void MissionViewModel::onMissionPreviewProgress(int currentIndex,
+                                                int totalItems,
+                                                double progress)
+{
+    Q_UNUSED(currentIndex)
+    Q_UNUSED(totalItems)
+    m_missionPreviewStatus = missionPreviewActive()
+        ? QStringLiteral("Running")
+        : m_missionPreviewStatus;
+    m_missionPreviewProgress = progress;
+    emit missionPreviewChanged();
+}
+
+void MissionViewModel::onMissionPreviewCompleted(int totalItems)
+{
+    m_missionPreviewStatus = QStringLiteral("Completed");
+    m_missionPreviewProgress = 1.0;
+    setStatus(QStringLiteral("Mission preview completed (%1 items)")
+              .arg(totalItems));
+    emit missionPreviewChanged();
+}
+
+void MissionViewModel::onMissionPreviewStopped(const QString& reason)
+{
+    m_missionPreviewStatus = QStringLiteral("Stopped");
+    setStatus(QStringLiteral("Mission preview stopped: %1").arg(reason));
+    emit missionPreviewChanged();
+}
+
 void MissionViewModel::markDirty()
 {
+    if (missionPreviewActive()) {
+        m_previewMockVehicle->stopMissionPreview(QStringLiteral("Mission edited"));
+    }
     if (m_dirty) return;
     m_dirty = true;
     emit dirtyChanged();

@@ -36,6 +36,14 @@ Rectangle {
         return "#8e8ea0"
     }
 
+    Connections {
+        target: missionVm
+        function onMissionPreviewStarted() {
+            vehicleVm.clearTrail()
+            root.currentTabIndex = 1
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0

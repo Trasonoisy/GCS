@@ -48,6 +48,53 @@ InfoCard {
             }
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: missionVm.missionPreviewActive ? 56 : 42
+            radius: 4
+            color: missionVm.missionPreviewActive
+                   ? "#12283D"
+                   : (missionVm.missionPreviewAllowed ? "#202A24" : "#2A2424")
+            border.color: missionVm.missionPreviewActive
+                          ? "#1F6FEB"
+                          : (missionVm.missionPreviewAllowed ? "#3B6A4A" : "#5A4545")
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 8
+                spacing: 6
+
+                Label {
+                    Layout.fillWidth: true
+                    text: missionVm.missionPreviewActive
+                          ? qsTr("Preview running: ") + Math.round(missionVm.missionPreviewProgress * 100) + "%"
+                          : (missionVm.missionPreviewAllowed
+                             ? qsTr("Preview target: MockVehicle")
+                             : qsTr("Preview blocked: ") + missionVm.missionPreviewBlockedReason)
+                    color: missionVm.missionPreviewActive
+                           ? "#7DB7FF"
+                           : (missionVm.missionPreviewAllowed ? "#A0E060" : "#FFAA33")
+                    font.bold: true
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Rectangle {
+                    visible: missionVm.missionPreviewActive
+                    Layout.fillWidth: true
+                    height: 6
+                    radius: 3
+                    color: "#1F1F1F"
+                    Rectangle {
+                        width: parent.width * missionVm.missionPreviewProgress
+                        height: parent.height
+                        radius: parent.radius
+                        color: "#1F6FEB"
+                    }
+                }
+            }
+        }
+
         GridLayout {
             columns: 2
             columnSpacing: 8
@@ -75,6 +122,21 @@ InfoCard {
                 text: qsTr("Clear plan")
                 enabled: missionVm.itemCount > 0
                 onClicked: missionVm.clearMission()
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: qsTr("Simulate mission")
+                enabled: !missionVm.missionPreviewActive
+                         && missionVm.missionPreviewAllowed
+                         && missionVm.itemCount > 0
+                onClicked: missionVm.simulateMission()
+            }
+            Button {
+                Layout.fillWidth: true
+                text: qsTr("Stop simulation")
+                enabled: missionVm.missionPreviewActive
+                onClicked: missionVm.stopMissionSimulation()
             }
 
             Button {

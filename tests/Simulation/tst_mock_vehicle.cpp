@@ -2,6 +2,7 @@
 #include <QtTest/QtTest>
 
 #include "Firmware/PX4FirmwarePlugin.h"
+#include "Mission/MissionPlan.h"
 #include "Simulation/MockVehicle.h"
 #include "Vehicle/Vehicle.h"
 #include "Vehicle/VehicleStateStore.h"
@@ -19,8 +20,32 @@ private slots:
     void heartbeatTickPromotesLinkAndStampsTime();
     void telemetryTickUpdatesMotionFields();
     void manualSamplesDriveSimulatedTelemetry();
+    void missionPreviewStartsAtFirstWaypointAndMoves();
+    void missionPreviewCompletesAndDisarms();
     void appendsStartEvent();
 };
+
+namespace {
+gcs::mission::MissionPlan previewPlan(double lonDelta)
+{
+    gcs::mission::MissionPlan plan;
+    plan.cruiseSpeedMps = 10.0;
+
+    gcs::mission::MissionItem first;
+    first.seq = 0;
+    first.latitudeDeg = 21.0285;
+    first.longitudeDeg = 105.8048;
+    first.altitudeM = 10.0;
+
+    gcs::mission::MissionItem second = first;
+    second.seq = 1;
+    second.longitudeDeg += lonDelta;
+    second.altitudeM = 20.0;
+
+    plan.items = {first, second};
+    return plan;
+}
+} // namespace
 
 void TestMockVehicle::marksStateSimulated()
 {
@@ -88,6 +113,52 @@ void TestMockVehicle::manualSamplesDriveSimulatedTelemetry()
     QVERIFY(after.pitchDeg > 0.0);
     QVERIFY(after.groundSpeedMps > 0.0);
     QCOMPARE(mock.manualSampleCount(), 1);
+}
+
+void TestMockVehicle::missionPreviewStartsAtFirstWaypointAndMoves()
+{
+    PX4FirmwarePlugin fw;
+    Vehicle vehicle(1, 1, &fw);
+    MockVehicle mock(&vehicle);
+
+    const auto plan = previewPlan(0.001);
+    QVERIFY(mock.startMissionPreview(plan, 10.0));
+
+    auto s = vehicle.stateStore()->state();
+    QVERIFY(mock.missionPreviewActive());
+    QCOMPARE(s.flightMode, QStringLiteral("AUTO (PREVIEW)"));
+    QVERIFY(s.armed);
+    QCOMPARE(s.latitudeDeg, plan.items.first().latitudeDeg);
+    QCOMPARE(s.longitudeDeg, plan.items.first().longitudeDeg);
+
+    mock.tickTelemetryNow();
+    s = vehicle.stateStore()->state();
+    QVERIFY(s.longitudeDeg > plan.items.first().longitudeDeg);
+    QVERIFY(s.longitudeDeg < plan.items.last().longitudeDeg);
+    QVERIFY(s.relativeAltitudeM > plan.items.first().altitudeM);
+    QVERIFY(s.groundSpeedMps > 0.0);
+    QVERIFY(mock.missionPreviewProgress() > 0.0);
+}
+
+void TestMockVehicle::missionPreviewCompletesAndDisarms()
+{
+    PX4FirmwarePlugin fw;
+    Vehicle vehicle(1, 1, &fw);
+    MockVehicle mock(&vehicle);
+
+    const auto plan = previewPlan(0.00001);
+    QSignalSpy completed(&mock, &MockVehicle::missionPreviewCompleted);
+    QVERIFY(mock.startMissionPreview(plan, 50.0));
+
+    mock.tickTelemetryNow();
+
+    const auto& s = vehicle.stateStore()->state();
+    QVERIFY(!mock.missionPreviewActive());
+    QCOMPARE(completed.count(), 1);
+    QCOMPARE(s.flightMode, QStringLiteral("MISSION COMPLETE"));
+    QVERIFY(!s.armed);
+    QVERIFY(qAbs(s.longitudeDeg - plan.items.last().longitudeDeg) < 1e-9);
+    QVERIFY(mock.missionPreviewProgress() >= 1.0);
 }
 
 void TestMockVehicle::appendsStartEvent()
