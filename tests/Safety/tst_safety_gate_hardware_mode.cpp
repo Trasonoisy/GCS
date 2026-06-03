@@ -33,6 +33,7 @@ private slots:
     void manualControlBlockedOnUnknownLinkKind();
     void missionUploadBlockedOnSerialLink();
     void missionUploadAllowedOnMockLink();
+    void armTakeoffAndRtlBlockedOnSerialLink();
 };
 
 namespace {
@@ -149,6 +150,20 @@ void TestSafetyGateHardwareMode::missionUploadAllowedOnMockLink()
     s.simulated = true;
     const auto d = g.canUploadMission(s, oneWaypointMission());
     QVERIFY(d.allowed);
+}
+
+void TestSafetyGateHardwareMode::armTakeoffAndRtlBlockedOnSerialLink()
+{
+    SafetyGate g;
+    const auto s = liveVehicle(LinkKind::Serial, QStringLiteral("PX4"));
+
+    const auto arm = g.canArm(s);
+    const auto takeoff = g.canTakeoff(s, 10.0);
+    const auto rtl = g.canTriggerRTL(s);
+
+    QVERIFY(!arm.allowed);
+    QVERIFY(!takeoff.allowed);
+    QVERIFY(!rtl.allowed);
 }
 
 QTEST_MAIN(TestSafetyGateHardwareMode)

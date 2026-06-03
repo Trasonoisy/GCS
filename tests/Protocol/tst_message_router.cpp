@@ -1,5 +1,6 @@
 #include <QSignalSpy>
 #include <QtTest/QtTest>
+#include <cstring>
 
 #include "Comms/LinkInterface.h"
 #include "Firmware/ArduCopterFirmwarePlugin.h"
@@ -30,6 +31,7 @@ private slots:
     void heartbeatPromotesLinkAndDecodesMode();
     void ardupilotHeartbeatCreatesExpectedFirmwarePlugin_data();
     void ardupilotHeartbeatCreatesExpectedFirmwarePlugin();
+    void serialTelemetryCreatesReadOnlyHardwareVehicleAndUpdatesState();
 };
 
 static QByteArray heartbeatPayload(uint8_t mavType, uint8_t autopilot,
@@ -56,12 +58,42 @@ static QByteArray px4HeartbeatPayload(uint8_t main, uint8_t sub)
 }
 
 namespace {
+class TestLink final : public gcs::comms::LinkInterface
+{
+    Q_OBJECT
+public:
+    explicit TestLink(gcs::comms::LinkKind kind, QObject* parent = nullptr)
+        : gcs::comms::LinkInterface(parent), m_kind(kind)
+    {
+    }
+
+    QString name() const override { return QStringLiteral("test-link"); }
+    bool isConnected() const override { return true; }
+    gcs::comms::LinkKind kind() const override { return m_kind; }
+
+    void connectLink() override {}
+    void disconnectLink() override {}
+    void writeBytes(const QByteArray&) override {}
+
+    void inject(const QByteArray& bytes) { emit bytesReceived(this, bytes); }
+
+private:
+    gcs::comms::LinkKind m_kind;
+};
+
 template <typename T>
 bool isInstanceOf(QObject* obj)
 {
     return qobject_cast<T*>(obj) != nullptr;
 }
+
+template <typename T>
+void writeLE(QByteArray& p, int offset, T value)
+{
+    if (p.size() < offset + int(sizeof(T))) p.resize(offset + int(sizeof(T)));
+    std::memcpy(p.data() + offset, &value, sizeof(T));
 }
+} // namespace
 
 void TestMessageRouter::unknownHeartbeatSpawnsVehicle()
 {
@@ -204,6 +236,89 @@ void TestMessageRouter::ardupilotHeartbeatCreatesExpectedFirmwarePlugin()
         QVERIFY(isInstanceOf<gcs::firmware::ArduRoverFirmwarePlugin>(fw));
     else if (vehicleType == QStringLiteral("Sub"))
         QVERIFY(isInstanceOf<gcs::firmware::ArduSubFirmwarePlugin>(fw));
+}
+
+void TestMessageRouter::serialTelemetryCreatesReadOnlyHardwareVehicleAndUpdatesState()
+{
+    MultiVehicleManager mgr;
+    MAVLinkProtocol proto;
+    MAVLinkMessageRouter router;
+    TestLink serialLink(gcs::comms::LinkKind::Serial);
+
+    router.setMultiVehicleManager(&mgr);
+    router.setProtocol(&proto);
+    proto.attachLink(&serialLink);
+
+    gcs::comms::LinkKind factoryLinkKind = gcs::comms::LinkKind::Unknown;
+    gcs::comms::LinkInterface* factorySourceLink = nullptr;
+    router.setVehicleFactory(
+        [&](int sysid, int compid, int autopilot, int type,
+            gcs::comms::LinkKind linkKind,
+            gcs::comms::LinkInterface* sourceLink) -> Vehicle* {
+            factoryLinkKind = linkKind;
+            factorySourceLink = sourceLink;
+            auto* fw = gcs::firmware::FirmwarePluginManager::createForHeartbeat(
+                static_cast<uint8_t>(autopilot),
+                static_cast<uint8_t>(type),
+                &mgr);
+            auto* v = new Vehicle(sysid, compid, fw, &mgr);
+            v->stateStore()->setLinkKind(linkKind);
+            mgr.addVehicle(v);
+            return v;
+        });
+
+    serialLink.inject(buildV2Frame(42, 1, msgid::Heartbeat,
+                                   px4HeartbeatPayload(4, 4)));
+
+    auto* veh = mgr.findBySysCompId(42, 1);
+    QVERIFY(veh);
+    QCOMPARE(factoryLinkKind, gcs::comms::LinkKind::Serial);
+    QCOMPARE(factorySourceLink, &serialLink);
+    QCOMPARE(veh->stateStore()->state().linkKind, gcs::comms::LinkKind::Serial);
+    QCOMPARE(veh->stateStore()->state().linkStatus, LinkStatus::Connected);
+    QCOMPARE(veh->stateStore()->state().autopilotType, QStringLiteral("PX4"));
+    QCOMPARE(veh->stateStore()->state().flightMode, QStringLiteral("Mission"));
+
+    QByteArray sysStatus(31, 0);
+    writeLE<quint16>(sysStatus, 14, 12600);
+    writeLE<qint8>(sysStatus, 30, 88);
+    serialLink.inject(buildV2Frame(42, 1, msgid::SysStatus, sysStatus));
+
+    QByteArray gps(30, 0);
+    writeLE<quint8>(gps, 28, 3);
+    writeLE<quint8>(gps, 29, 11);
+    serialLink.inject(buildV2Frame(42, 1, msgid::GpsRawInt, gps));
+
+    QByteArray attitude(28, 0);
+    writeLE<float>(attitude, 4, 0.10f);
+    writeLE<float>(attitude, 8, -0.20f);
+    writeLE<float>(attitude, 12, 1.57f);
+    serialLink.inject(buildV2Frame(42, 1, msgid::Attitude, attitude));
+
+    QByteArray position(28, 0);
+    writeLE<qint32>(position, 4, qint32(210285000));
+    writeLE<qint32>(position, 8, qint32(1058048000));
+    writeLE<qint32>(position, 16, qint32(45600));
+    writeLE<quint16>(position, 26, quint16(8600));
+    serialLink.inject(buildV2Frame(42, 1, msgid::GlobalPositionInt, position));
+
+    QByteArray vfr(20, 0);
+    writeLE<float>(vfr, 4, 6.25f);
+    serialLink.inject(buildV2Frame(42, 1, msgid::VfrHud, vfr));
+
+    const auto& s = veh->stateStore()->state();
+    QCOMPARE(s.batteryVoltage, 12.6);
+    QCOMPARE(s.batteryPercent, 88.0);
+    QCOMPARE(s.gpsFixType, 3);
+    QCOMPARE(s.satellitesVisible, 11);
+    QCOMPARE(s.latitudeDeg, 21.0285);
+    QCOMPARE(s.longitudeDeg, 105.8048);
+    QCOMPARE(s.relativeAltitudeM, 45.6);
+    QVERIFY(qAbs(s.rollDeg - 5.7296) < 0.01);
+    QVERIFY(qAbs(s.pitchDeg + 11.4592) < 0.01);
+    QCOMPARE(s.headingDeg, 86.0);
+    QCOMPARE(s.groundSpeedMps, 6.25);
+    QVERIFY(!veh->missionManager());
 }
 
 QTEST_MAIN(TestMessageRouter)
