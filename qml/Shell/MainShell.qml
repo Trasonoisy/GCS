@@ -9,7 +9,7 @@ import LabGCS
 // as they are — only the surrounding chrome is restyled.
 Rectangle {
     id: root
-    color: "#212121"
+    color: Theme.appBackground
 
     // Default to Plan so the operator opens straight into the planner.
     property int initialTabIndex: 0
@@ -29,11 +29,11 @@ Rectangle {
     }
 
     function modeAccent() {
-        if (linkVm.hardwareReadOnlyActive) return "#FF5252"
-        if (vehicleVm.simulated) return "#FF8A00"
-        if (missionVm.transferAllowed && !vehicleVm.simulated) return "#1F6FEB"
-        if (linkVm.connected) return "#C2A04F"
-        return "#8e8ea0"
+        if (linkVm.hardwareReadOnlyActive) return Theme.danger
+        if (vehicleVm.simulated) return Theme.warning
+        if (missionVm.transferAllowed && !vehicleVm.simulated) return Theme.accent
+        if (linkVm.connected) return Theme.warning
+        return Theme.textMuted
     }
 
     Connections {
@@ -62,14 +62,14 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             height: 60
-            color: "#212121"
+            color: Theme.appBackground
             // 1px hairline divider below the header
             Rectangle {
                 anchors.left:  parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 height: 1
-                color: "#2f2f2f"
+                color: Theme.borderSoft
             }
 
             RowLayout {
@@ -84,20 +84,20 @@ Rectangle {
                     Layout.preferredWidth: 180
                     Rectangle {
                         width: 30; height: 30; radius: 15
-                        color: "#2f2f2f"
-                        border.color: "#3f3f46"
+                        color: Theme.surfaceElevated
+                        border.color: Theme.border
                         border.width: 1
                         Label {
                             anchors.centerIn: parent
                             text: "LG"
-                            color: "#ECECF1"
+                            color: Theme.textPrimary
                             font.pixelSize: 12
                             font.weight: Font.DemiBold
                         }
                     }
                     Label {
                         text: qsTr("Lab GCS")
-                        color: "#ECECF1"
+                        color: Theme.textPrimary
                         font.pixelSize: 15
                         font.weight: Font.Medium
                     }
@@ -111,8 +111,8 @@ Rectangle {
                     Layout.preferredHeight: 36
                     Layout.preferredWidth: tabRow.implicitWidth + 8
                     radius: 18
-                    color: "#2a2a2a"
-                    border.color: "#3f3f46"
+                    color: Theme.surfaceRaised
+                    border.color: Theme.border
                     border.width: 1
 
                     RowLayout {
@@ -131,15 +131,15 @@ Rectangle {
                                 Layout.alignment: Qt.AlignVCenter
                                 radius: 14
                                 color: root.currentTabIndex === index
-                                       ? "#404045"
-                                       : (tabMA.containsMouse ? "#363636" : "transparent")
+                                       ? Theme.activeSurface
+                                       : (tabMA.containsMouse ? Theme.hoverSurface : "transparent")
                                 Behavior on color { ColorAnimation { duration: 100 } }
 
                                 Label {
                                     id: tabLbl
                                     anchors.centerIn: parent
                                     text: modelData
-                                    color: root.currentTabIndex === index ? "#FFFFFF" : "#ECECF1"
+                                    color: root.currentTabIndex === index ? Theme.textPrimary : Theme.textSecondary
                                     font.pixelSize: 12
                                     font.weight: root.currentTabIndex === index ? Font.DemiBold : Font.Normal
                                 }
@@ -162,8 +162,8 @@ Rectangle {
                     Layout.preferredHeight: 28
                     Layout.preferredWidth: modeChipRow.implicitWidth + 18
                     radius: 14
-                    color: "#2a2a2a"
-                    border.color: "#3f3f46"
+                    color: Theme.surfaceRaised
+                    border.color: Theme.border
                     border.width: 1
                     RowLayout {
                         id: modeChipRow
@@ -172,7 +172,7 @@ Rectangle {
                         Rectangle { width: 8; height: 8; radius: 4; color: root.modeAccent() }
                         Label {
                             text: root.modeLabel()
-                            color: "#ECECF1"
+                            color: Theme.textPrimary
                             font.pixelSize: 11
                             font.weight: Font.DemiBold
                         }
@@ -184,14 +184,14 @@ Rectangle {
                     Layout.preferredHeight: 30
                     Layout.preferredWidth: 110
                     radius: 15
-                    color: changeMA.containsMouse ? "#363636" : "#2f2f2f"
-                    border.color: "#3f3f46"
+                    color: changeMA.containsMouse ? Theme.hoverSurface : Theme.surfaceElevated
+                    border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 100 } }
                     Label {
                         anchors.centerIn: parent
                         text: qsTr("Change link")
-                        color: "#ECECF1"
+                        color: Theme.textPrimary
                         font.pixelSize: 11
                     }
                     MouseArea {
@@ -209,14 +209,14 @@ Rectangle {
                     Layout.preferredHeight: 30
                     Layout.preferredWidth: 80
                     radius: 15
-                    color: homeMA.containsMouse ? "#363636" : "#2f2f2f"
-                    border.color: "#3f3f46"
+                    color: homeMA.containsMouse ? Theme.hoverSurface : Theme.surfaceElevated
+                    border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 100 } }
                     Label {
                         anchors.centerIn: parent
                         text: qsTr("Home")
-                        color: "#ECECF1"
+                        color: Theme.textPrimary
                         font.pixelSize: 11
                     }
                     MouseArea {

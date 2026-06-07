@@ -9,7 +9,7 @@ import LabGCS
 // existing ConnectionPanel and add Back / Continue navigation signals.
 Rectangle {
     id: root
-    color: "#212121"
+    color: Theme.appBackground
 
     signal back()
     signal continueToMain()
@@ -27,9 +27,9 @@ Rectangle {
     }
 
     function statusColor() {
-        if (root.anyRealLink) return "#10A37F"
-        if (root.udpListeningOnly) return "#FFC107"
-        return "#8e8ea0"
+        if (root.anyRealLink) return Theme.accent
+        if (root.udpListeningOnly) return Theme.warning
+        return Theme.textMuted
     }
 
     // ---- top minimal header (no harsh background) -----------------------
@@ -49,14 +49,14 @@ Rectangle {
             Layout.preferredHeight: 32
             Layout.preferredWidth: 80
             radius: 16
-            color: backMA.containsMouse ? "#363636" : "#2f2f2f"
-            border.color: "#3f3f46"
+            color: backMA.containsMouse ? Theme.hoverSurface : Theme.surfaceElevated
+            border.color: Theme.border
             Behavior on color { ColorAnimation { duration: 100 } }
 
             Label {
                 anchors.centerIn: parent
                 text: qsTr("< Back")
-                color: "#ECECF1"
+                color: Theme.textPrimary
                 font.pixelSize: 12
             }
             MouseArea {
@@ -75,10 +75,10 @@ Rectangle {
             Layout.preferredHeight: 26
             Layout.preferredWidth: chipLabel.implicitWidth + 22
             radius: 13
-            color: root.anyRealLink ? "#1f3b1f"
-                                     : (root.udpListeningOnly ? "#3a321d" : "#2f2f2f")
-            border.color: root.anyRealLink ? "#3f6f3f"
-                                           : (root.udpListeningOnly ? "#7a641c" : "#3f3f46")
+            color: root.anyRealLink ? Theme.successSurface
+                                     : (root.udpListeningOnly ? Theme.warningSurface : Theme.surfaceElevated)
+            border.color: root.anyRealLink ? Theme.successBorder
+                                           : (root.udpListeningOnly ? Theme.warningBorder : Theme.border)
             RowLayout {
                 anchors.centerIn: parent
                 spacing: 6
@@ -89,8 +89,8 @@ Rectangle {
                 Label {
                     id: chipLabel
                     text: root.statusText()
-                    color: root.anyRealLink ? "#9be6c2"
-                                            : (root.udpListeningOnly ? "#ffd866" : "#8e8ea0")
+                    color: root.anyRealLink ? Theme.success
+                                            : (root.udpListeningOnly ? Theme.warning : Theme.textMuted)
                     font.pixelSize: 11
                 }
             }
@@ -106,7 +106,7 @@ Rectangle {
         anchors.topMargin:    8
         anchors.bottomMargin: 8
         clip: true
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         Item {
@@ -124,14 +124,14 @@ Rectangle {
                     Label {
                         Layout.alignment: Qt.AlignHCenter
                         text: qsTr("Connect to a vehicle")
-                        color: "#ECECF1"
+                        color: Theme.textPrimary
                         font.pixelSize: 24
                         font.weight: Font.Medium
                     }
                     Label {
                         Layout.alignment: Qt.AlignHCenter
                         text: qsTr("Pick UDP for SITL, or Serial for a real autopilot (telemetry only).")
-                        color: "#8e8ea0"
+                        color: Theme.textSecondary
                         font.pixelSize: 13
                     }
                 }
@@ -143,8 +143,8 @@ Rectangle {
                 // of its logic or layout.
                 ConnectionPanel {
                     Layout.fillWidth: true
-                    color: "#2a2a2a"
-                    border.color: "#3f3f46"
+                    color: Theme.surfaceRaised
+                    border.color: Theme.border
                     radius: 14
                 }
 
@@ -157,9 +157,9 @@ Rectangle {
 
                     Repeater {
                         model: [
-                            { dot: "#1F6FEB", title: qsTr("UDP (SITL)"),
+                            { dot: Theme.accent, title: qsTr("UDP (SITL)"),
                               body: qsTr("Listens for PX4 or ArduPilot SITL. Mission upload and download enabled.") },
-                            { dot: "#FF5252", title: qsTr("Serial (hardware)"),
+                            { dot: Theme.danger, title: qsTr("Serial (hardware)"),
                               body: qsTr("Read-only. Telemetry shown, but commands and mission writes are refused.") },
                             { dot: "#FF8A00", title: qsTr("Mock vehicle"),
                               body: qsTr("Always running. Continuing without a real link will fly the mock.") }
@@ -168,8 +168,8 @@ Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 96
                             radius: 12
-                            color: "#2a2a2a"
-                            border.color: "#3f3f46"
+                            color: Theme.surfaceRaised
+                            border.color: Theme.border
                             border.width: 1
                             ColumnLayout {
                                 anchors.fill: parent
@@ -180,14 +180,14 @@ Rectangle {
                                     Rectangle { width: 8; height: 8; radius: 4; color: modelData.dot }
                                     Label {
                                         text: modelData.title
-                                        color: "#ECECF1"
+                                        color: Theme.textPrimary
                                         font.pixelSize: 12
                                         font.weight: Font.DemiBold
                                     }
                                 }
                                 Label {
                                     text: modelData.body
-                                    color: "#8e8ea0"
+                                    color: Theme.textSecondary
                                     font.pixelSize: 11
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
@@ -214,7 +214,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top:   parent.top
             height: 1
-            color: "#2f2f2f"
+            color: Theme.borderSoft
         }
 
         RowLayout {
@@ -225,7 +225,7 @@ Rectangle {
 
             Label {
                 Layout.fillWidth: true
-                color: "#8e8ea0"
+                color: Theme.textSecondary
                 font.pixelSize: 12
                 text: root.sitlHeartbeatSeen
                       ? qsTr("PX4 SITL heartbeat received. You can continue.")
@@ -241,13 +241,13 @@ Rectangle {
                 Layout.preferredHeight: 40
                 Layout.preferredWidth: 160
                 radius: 20
-                color: contMA.containsMouse ? "#f5f5f5" : "#ECECF1"
+                color: contMA.containsMouse ? Theme.accentHover : Theme.accent
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Continue >")
-                    color: "#1a1a1a"
+                    color: "white"
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
                 }

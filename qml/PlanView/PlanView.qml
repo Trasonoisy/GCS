@@ -5,7 +5,7 @@ import LabGCS
 
 Rectangle {
     id: root
-    color: "#121212"
+    color: Theme.appBackground
 
     ScrollView {
         id: planScroll
@@ -13,7 +13,7 @@ Rectangle {
         clip: true
         contentWidth: availableWidth
         contentHeight: planContent.y + planContent.implicitHeight + 12
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         RowLayout {
@@ -21,7 +21,7 @@ Rectangle {
             x: 12
             y: 12
             width: Math.max(0, planScroll.availableWidth - 24)
-            spacing: 12
+            spacing: Theme.gapMd
 
             ColumnLayout {
                 Layout.fillWidth: true

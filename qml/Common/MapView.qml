@@ -192,8 +192,8 @@ Item {
 
         Rectangle {
             width: 32; height: 32; radius: 4
-            color: "#222222"; opacity: 0.85
-            border.color: "#555555"
+            color: Theme.surfaceElevated; opacity: 0.85
+            border.color: Theme.border
             Label {
                 anchors.centerIn: parent
                 text: "+"; color: "white"; font.bold: true; font.pixelSize: 18
@@ -205,8 +205,8 @@ Item {
         }
         Rectangle {
             width: 32; height: 32; radius: 4
-            color: "#222222"; opacity: 0.85
-            border.color: "#555555"
+            color: Theme.surfaceElevated; opacity: 0.85
+            border.color: Theme.border
             Label {
                 anchors.centerIn: parent
                 text: "−"; color: "white"; font.bold: true; font.pixelSize: 18
@@ -224,8 +224,8 @@ Item {
         anchors.left:   parent.left
         anchors.top:    parent.top
         anchors.margins: 8
-        color: "#222222"; opacity: 0.85; radius: 4
-        border.color: "#555555"
+        color: Theme.surfaceElevated; opacity: 0.85; radius: 4
+        border.color: Theme.border
         width: zoomLabel.implicitWidth + 16
         height: zoomLabel.implicitHeight + 8
         Label {

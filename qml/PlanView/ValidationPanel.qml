@@ -17,8 +17,8 @@ InfoCard {
             Layout.fillWidth: true
             height: 46
             radius: 4
-            color: "#1F3A5F"
-            border.color: "#264F78"
+            color: Theme.infoSurface
+            border.color: Theme.infoBorder
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 8
@@ -31,7 +31,7 @@ InfoCard {
                     font.bold: true
                     Layout.fillWidth: true
                 }
-                ProgressBar {
+                StyledProgressBar {
                     Layout.fillWidth: true
                     from: 0
                     to: Math.max(1, missionVm.transferTotal)
@@ -44,10 +44,10 @@ InfoCard {
             Layout.fillWidth: true
             height: 34
             radius: 4
-            color: !missionVm.validationRun ? "#252525"
-                  : missionVm.valid ? "#19351F" : "#3A2424"
-            border.color: !missionVm.validationRun ? "#3C3C3C"
-                        : missionVm.valid ? "#2C703A" : "#7A3A3A"
+            color: !missionVm.validationRun ? Theme.surfaceElevated
+                  : missionVm.valid ? Theme.successSurface : Theme.dangerSurface
+            border.color: !missionVm.validationRun ? Theme.border
+                        : missionVm.valid ? Theme.successBorder : Theme.dangerBorder
             Label {
                 anchors.centerIn: parent
                 text: !missionVm.validationRun
@@ -60,8 +60,8 @@ InfoCard {
                         : qsTr("Mission invalid - ")
                           + missionVm.validationErrors.length
                           + qsTr(" error(s)")
-                color: !missionVm.validationRun ? "#CCCCCC"
-                      : missionVm.valid ? "#A0E060" : "#FF8080"
+                color: !missionVm.validationRun ? Theme.textPrimary
+                      : missionVm.valid ? Theme.success : Theme.danger
                 font.bold: true
             }
         }
@@ -75,7 +75,7 @@ InfoCard {
             delegate: Rectangle {
                 width: validationList.width
                 implicitHeight: msg.implicitHeight + 8
-                color: index % 2 === 0 ? "#181818" : "#202020"
+                color: index % 2 === 0 ? Theme.listRow : Theme.listRowAlt
                 Label {
                     id: msg
                     anchors.left: parent.left
@@ -86,7 +86,7 @@ InfoCard {
                     text: (index < missionVm.validationErrors.length
                            ? "ERROR: " : "WARN: ") + modelData
                     color: index < missionVm.validationErrors.length
-                           ? "#FF8080" : "#FFCC66"
+                           ? Theme.danger : Theme.warning
                     wrapMode: Text.WrapAnywhere
                     font.pixelSize: 12
                 }
@@ -99,7 +99,7 @@ InfoCard {
                 text: missionVm.validationRun
                       ? qsTr("No validation messages.")
                       : qsTr("Run validation to check mission altitude, frames, commands, and coordinates.")
-                color: "#777777"
+                color: Theme.textMuted
                 font.italic: true
                 wrapMode: Text.Wrap
                 width: parent.width - 32
@@ -107,11 +107,11 @@ InfoCard {
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: "#3C3C3C" }
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
         Label {
             text: qsTr("Last status: ") + missionVm.statusText
-            color: "#CCCCCC"
+            color: Theme.textPrimary
             wrapMode: Text.WrapAnywhere
             Layout.fillWidth: true
         }

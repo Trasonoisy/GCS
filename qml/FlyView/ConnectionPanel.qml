@@ -17,8 +17,8 @@ InfoCard {
             rowSpacing: 6
             Layout.fillWidth: true
 
-            Label { text: qsTr("Mode"); color: "#9A9A9A" }
-            ComboBox {
+            Label { text: qsTr("Mode"); color: Theme.textSecondary }
+            StyledComboBox {
                 Layout.fillWidth: true
                 model: linkVm.connectionKindOptions
                 currentIndex: linkVm.connectionKind === "Serial" ? 1 : 0
@@ -27,7 +27,7 @@ InfoCard {
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: "#3C3C3C" }
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
         ColumnLayout {
             visible: linkVm.connectionKind === "UDP"
@@ -36,7 +36,7 @@ InfoCard {
 
             Label {
                 text: qsTr("PX4 / ArduPilot SITL telemetry and mission transfer")
-                color: "#7FB7E0"
+                color: Theme.blue
                 font.bold: true
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
@@ -48,16 +48,16 @@ InfoCard {
                 rowSpacing: 6
                 Layout.fillWidth: true
 
-                Label { text: qsTr("Listen host"); color: "#9A9A9A" }
-                TextField {
+                Label { text: qsTr("Listen host"); color: Theme.textSecondary }
+                StyledTextField {
                     Layout.fillWidth: true
                     text: linkVm.listenHost
                     enabled: !linkVm.connected
                     onEditingFinished: linkVm.listenHost = text
                 }
 
-                Label { text: qsTr("Listen port"); color: "#9A9A9A" }
-                TextField {
+                Label { text: qsTr("Listen port"); color: Theme.textSecondary }
+                StyledTextField {
                     Layout.fillWidth: true
                     text: linkVm.listenPort
                     enabled: !linkVm.connected
@@ -65,7 +65,7 @@ InfoCard {
                     onEditingFinished: linkVm.listenPort = parseInt(text)
                 }
 
-                Label { text: qsTr("Status"); color: "#9A9A9A" }
+                Label { text: qsTr("Status"); color: Theme.textSecondary }
                 Label {
                     text: linkVm.connected
                           ? (linkVm.peerSeen
@@ -73,8 +73,8 @@ InfoCard {
                              : qsTr("Listening - waiting for SITL heartbeat"))
                           : qsTr("Disconnected")
                     color: linkVm.connected
-                           ? (linkVm.peerSeen ? "#A0E060" : "#FFC107")
-                           : "#FF8080"
+                           ? (linkVm.peerSeen ? Theme.success : Theme.warning)
+                           : Theme.danger
                     font.bold: true
                     wrapMode: Text.WrapAnywhere
                 }
@@ -83,13 +83,15 @@ InfoCard {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-                Button {
+                StyledButton {
                     text: qsTr("Start UDP listener")
+                    variant: "primary"
                     enabled: !linkVm.connected
                     onClicked: linkVm.connectToSitl()
                 }
-                Button {
+                StyledButton {
                     text: qsTr("Stop")
+                    variant: "danger"
                     enabled: linkVm.connected
                     onClicked: linkVm.disconnectFromSitl()
                 }
@@ -106,8 +108,8 @@ InfoCard {
                 Layout.fillWidth: true
                 height: 56
                 radius: 4
-                color: "#5A1F1F"
-                border.color: "#FF5252"
+                color: Theme.dangerSurface
+                border.color: Theme.danger
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Hardware Read-Only: telemetry is allowed, outbound commands are refused.")
@@ -123,7 +125,7 @@ InfoCard {
             Label {
                 visible: !linkVm.serialBackendAvailable
                 text: qsTr("Qt6::SerialPort is not compiled in. Install Qt SerialPort and reconfigure CMake.")
-                color: "#FFC107"
+                color: Theme.warning
                 wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
                 font.italic: true
@@ -137,8 +139,8 @@ InfoCard {
                 Layout.fillWidth: true
                 enabled: linkVm.serialBackendAvailable
 
-                Label { text: qsTr("Port"); color: "#9A9A9A" }
-                ComboBox {
+                Label { text: qsTr("Port"); color: Theme.textSecondary }
+                StyledComboBox {
                     Layout.fillWidth: true
                     model: linkVm.availableSerialPorts
                     currentIndex: {
@@ -150,14 +152,14 @@ InfoCard {
                     enabled: !linkVm.serialConnected
                     onActivated: (idx) => linkVm.serialPort = model[idx]
                 }
-                Button {
+                StyledButton {
                     text: qsTr("Refresh")
                     enabled: !linkVm.serialConnected
                     onClicked: linkVm.refreshSerialPorts()
                 }
 
-                Label { text: qsTr("Baud"); color: "#9A9A9A" }
-                ComboBox {
+                Label { text: qsTr("Baud"); color: Theme.textSecondary }
+                StyledComboBox {
                     Layout.fillWidth: true
                     Layout.columnSpan: 2
                     model: linkVm.serialBaudOptions
@@ -171,13 +173,13 @@ InfoCard {
                     onActivated: (idx) => linkVm.serialBaud = parseInt(model[idx])
                 }
 
-                Label { text: qsTr("Status"); color: "#9A9A9A" }
+                Label { text: qsTr("Status"); color: Theme.textSecondary }
                 Label {
                     Layout.columnSpan: 2
                     text: linkVm.serialConnected
                           ? qsTr("Connected - HARDWARE READ-ONLY")
                           : qsTr("Disconnected")
-                    color: linkVm.serialConnected ? "#A0E060" : "#FF8080"
+                    color: linkVm.serialConnected ? Theme.success : Theme.danger
                     font.bold: true
                     wrapMode: Text.WrapAnywhere
                 }
@@ -186,15 +188,17 @@ InfoCard {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-                Button {
+                StyledButton {
                     text: qsTr("Connect serial")
+                    variant: "primary"
                     enabled: linkVm.serialBackendAvailable
                              && !linkVm.serialConnected
                              && linkVm.serialPort !== ""
                     onClicked: linkVm.connectSerial()
                 }
-                Button {
+                StyledButton {
                     text: qsTr("Disconnect")
+                    variant: "danger"
                     enabled: linkVm.serialConnected
                     onClicked: linkVm.disconnectSerial()
                 }
@@ -205,7 +209,7 @@ InfoCard {
         Label {
             visible: linkVm.lastError.length > 0
             text: qsTr("Connection error: ") + linkVm.lastError
-            color: "#FF8080"
+            color: Theme.danger
             wrapMode: Text.WrapAnywhere
             font.pixelSize: 12
             Layout.fillWidth: true
@@ -213,7 +217,7 @@ InfoCard {
 
         Label {
             text: qsTr("UDP is for SITL. Serial is read-only hardware telemetry. Arm, takeoff, RTL, mission start, RC override, and real manual control remain disabled.")
-            color: "#777777"
+            color: Theme.textMuted
             font.italic: true
             font.pixelSize: 11
             wrapMode: Text.WrapAnywhere

@@ -5,7 +5,7 @@ import LabGCS
 
 Rectangle {
     id: root
-    color: "#121212"
+    color: Theme.appBackground
 
     ScrollView {
         id: flyScroll
@@ -13,7 +13,7 @@ Rectangle {
         clip: true
         contentWidth: availableWidth
         contentHeight: flyContent.y + flyContent.implicitHeight + 12
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
@@ -21,37 +21,38 @@ Rectangle {
             x: 12
             y: 12
             width: Math.max(0, flyScroll.availableWidth - 24)
-            spacing: 10
+            spacing: Theme.gapMd
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 38
-                radius: 4
-                color: "#181818"
-                border.color: "#333333"
+                height: 44
+                radius: Theme.radiusMd
+                color: Theme.surfaceRaised
+                border.color: Theme.border
+                border.width: 1
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
                     spacing: 12
 
                     Label {
                         text: qsTr("Active vehicle:")
-                        color: "#9A9A9A"
+                        color: Theme.textSecondary
                         font.pixelSize: 12
                     }
                     Label {
                         text: vehicleVm.vehicleLabel + " / " + vehicleVm.autopilotType
-                        color: "white"
+                        color: Theme.textPrimary
                         font.bold: true
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                     }
                     Label {
                         text: vehicleVm.linkStatusText
-                        color: vehicleVm.linkStatusText === "Connected" ? "#A0E060"
-                              : vehicleVm.linkStatusText === "Stale" ? "#FFC107" : "#FF8080"
+                        color: vehicleVm.linkStatusText === "Connected" ? Theme.success
+                              : vehicleVm.linkStatusText === "Stale" ? Theme.warning : Theme.danger
                         font.bold: true
                     }
                 }

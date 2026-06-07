@@ -5,7 +5,7 @@ import LabGCS
 
 Rectangle {
     id: root
-    color: "#121212"
+    color: Theme.appBackground
 
     function normThrottle() {
         return Math.max(0, Math.min(1, (manualVm.throttle + 1.0) / 2.0))
@@ -13,12 +13,12 @@ Rectangle {
 
     function stateColor(name) {
         switch (name) {
-            case "Active": return "#A0E060"
-            case "Ready": return "#7FB7E0"
+            case "Active": return Theme.success
+            case "Ready": return Theme.blue
             case "Failsafe":
-            case "Blocked": return "#FF5252"
-            case "WaitingForJoystick": return "#FFC107"
-            default: return "#9A9A9A"
+            case "Blocked": return Theme.danger
+            case "WaitingForJoystick": return Theme.warning
+            default: return Theme.textSecondary
         }
     }
 
@@ -34,12 +34,12 @@ Rectangle {
 
     function sinkColor() {
         if (manualVm.sinkSimulated)
-            return "#A0E060"
+            return Theme.success
         if (manualVm.sinkLabel.indexOf("MANUAL_CONTROL") >= 0)
-            return "#7FB7E0"
+            return Theme.blue
         if (manualVm.sinkLabel.indexOf("SITL-stub") >= 0)
-            return "#FFAA33"
-        return "#9A9A9A"
+            return Theme.warning
+        return Theme.textSecondary
     }
 
     ScrollView {
@@ -48,7 +48,7 @@ Rectangle {
         clip: true
         contentWidth: availableWidth
         contentHeight: manualContent.y + manualContent.implicitHeight + 12
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
@@ -56,19 +56,20 @@ Rectangle {
             x: 12
             y: 12
             width: Math.max(0, manualScroll.availableWidth - 24)
-            spacing: 12
+            spacing: Theme.gapMd
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 44
-                color: "#5A1F1F"
-                border.color: "#FF5252"
-                radius: 4
+                height: 46
+                color: Theme.dangerSurface
+                border.color: Theme.dangerBorder
+                border.width: 1
+                radius: Theme.radiusMd
                 Label {
                     anchors.centerIn: parent
                     width: parent.width - 20
                     text: qsTr("Manual control is enabled for MockVehicle and UDP SITL only. Serial hardware remains read-only.")
-                    color: "white"
+                    color: "#ffb4b4"
                     font.bold: true
                     font.pixelSize: 12
                     wrapMode: Text.Wrap
@@ -93,7 +94,7 @@ Rectangle {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Label { text: qsTr("State"); color: "#9A9A9A"; Layout.preferredWidth: 110 }
+                            Label { text: qsTr("State"); color: Theme.textSecondary; Layout.preferredWidth: 110 }
                             Label {
                                 text: manualVm.stateName
                                 color: root.stateColor(manualVm.stateName)
@@ -103,12 +104,12 @@ Rectangle {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Label { text: qsTr("Vehicle"); color: "#9A9A9A"; Layout.preferredWidth: 110 }
+                            Label { text: qsTr("Vehicle"); color: Theme.textSecondary; Layout.preferredWidth: 110 }
                             Label { text: manualVm.vehicleLabel; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight }
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Label { text: qsTr("Sink"); color: "#9A9A9A"; Layout.preferredWidth: 110 }
+                            Label { text: qsTr("Sink"); color: Theme.textSecondary; Layout.preferredWidth: 110 }
                             Label {
                                 text: root.sinkDecoratedLabel()
                                 color: root.sinkColor()
@@ -122,8 +123,8 @@ Rectangle {
                             Layout.fillWidth: true
                             implicitHeight: reasonLabel.implicitHeight + 14
                             radius: 4
-                            color: "#3A2424"
-                            border.color: "#7A3A3A"
+                            color: Theme.dangerSurface
+                            border.color: Theme.dangerBorder
                             Label {
                                 id: reasonLabel
                                 anchors.left: parent.left
@@ -132,17 +133,17 @@ Rectangle {
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
                                 text: qsTr("Blocked reason: ") + manualVm.blockedReason
-                                color: "#FFAA33"
+                                color: Theme.warning
                                 wrapMode: Text.WrapAnywhere
                                 font.pixelSize: 12
                             }
                         }
 
-                        Rectangle { Layout.fillWidth: true; height: 1; color: "#3C3C3C" }
+                        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
                         Label {
                             text: qsTr("Activation checklist")
-                            color: "#CCCCCC"
+                            color: Theme.textPrimary
                             font.bold: true
                         }
 
@@ -152,8 +153,8 @@ Rectangle {
                                 Layout.fillWidth: true
                                 implicitHeight: itemText.implicitHeight + 8
                                 radius: 3
-                                color: modelData.indexOf("[OK]") === 0 ? "#17311C" : "#3A2424"
-                                border.color: modelData.indexOf("[OK]") === 0 ? "#2C703A" : "#7A3A3A"
+                                color: modelData.indexOf("[OK]") === 0 ? Theme.successSurface : Theme.dangerSurface
+                                border.color: modelData.indexOf("[OK]") === 0 ? Theme.successBorder : Theme.dangerBorder
                                 Label {
                                     id: itemText
                                     anchors.left: parent.left
@@ -162,25 +163,27 @@ Rectangle {
                                     anchors.leftMargin: 8
                                     anchors.rightMargin: 8
                                     text: modelData
-                                    color: modelData.indexOf("[OK]") === 0 ? "#A0E060" : "#FF8080"
+                                    color: modelData.indexOf("[OK]") === 0 ? Theme.success : Theme.danger
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
                                 }
                             }
                         }
 
-                        Rectangle { Layout.fillWidth: true; height: 1; color: "#3C3C3C" }
+                        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 6
-                            Button {
+                            StyledButton {
                                 text: qsTr("Enable")
+                                variant: "primary"
                                 enabled: !manualVm.operatorEnabled
                                 onClicked: manualVm.enable()
                             }
-                            Button {
+                            StyledButton {
                                 text: qsTr("Disable")
+                                variant: "danger"
                                 enabled: manualVm.operatorEnabled
                                 onClicked: manualVm.disable()
                             }
@@ -188,12 +191,13 @@ Rectangle {
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 6
-                            Button {
+                            StyledButton {
                                 text: manualVm.joystickConnected ? qsTr("Disconnect mock joystick")
                                                                   : qsTr("Connect mock joystick")
+                                variant: manualVm.joystickConnected ? "danger" : "primary"
                                 onClicked: manualVm.setJoystickConnected(!manualVm.joystickConnected)
                             }
-                            Button {
+                            StyledButton {
                                 text: qsTr("Center axes")
                                 onClicked: manualVm.centreAxes()
                             }
@@ -201,7 +205,7 @@ Rectangle {
 
                         Label {
                             text: qsTr("Samples delivered to safe sink: ") + manualVm.totalSamplesSent
-                            color: "#9A9A9A"
+                            color: Theme.textSecondary
                             font.pixelSize: 12
                         }
                     }
@@ -222,20 +226,20 @@ Rectangle {
                         rowSpacing: 10
                         Layout.fillWidth: true
 
-                        Label { text: qsTr("Pitch"); color: "#9A9A9A" }
-                        Slider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawPitch; onMoved: manualVm.rawPitch = value }
+                        Label { text: qsTr("Pitch"); color: Theme.textSecondary }
+                        StyledSlider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawPitch; onMoved: manualVm.rawPitch = value }
                         Label { text: qsTr("raw ") + manualVm.rawPitch.toFixed(2) + qsTr(" / proc ") + manualVm.pitch.toFixed(2); color: "white"; font.family: "Consolas" }
 
-                        Label { text: qsTr("Roll"); color: "#9A9A9A" }
-                        Slider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawRoll; onMoved: manualVm.rawRoll = value }
+                        Label { text: qsTr("Roll"); color: Theme.textSecondary }
+                        StyledSlider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawRoll; onMoved: manualVm.rawRoll = value }
                         Label { text: qsTr("raw ") + manualVm.rawRoll.toFixed(2) + qsTr(" / proc ") + manualVm.roll.toFixed(2); color: "white"; font.family: "Consolas" }
 
-                        Label { text: qsTr("Throttle"); color: "#9A9A9A" }
-                        Slider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawThrottle; onMoved: manualVm.rawThrottle = value }
+                        Label { text: qsTr("Throttle"); color: Theme.textSecondary }
+                        StyledSlider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawThrottle; onMoved: manualVm.rawThrottle = value }
                         Label { text: qsTr("raw ") + manualVm.rawThrottle.toFixed(2) + qsTr(" / proc ") + manualVm.throttle.toFixed(2); color: "white"; font.family: "Consolas" }
 
-                        Label { text: qsTr("Yaw"); color: "#9A9A9A" }
-                        Slider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawYaw; onMoved: manualVm.rawYaw = value }
+                        Label { text: qsTr("Yaw"); color: Theme.textSecondary }
+                        StyledSlider { Layout.fillWidth: true; from: -1; to: 1; stepSize: 0.01; value: manualVm.rawYaw; onMoved: manualVm.rawYaw = value }
                         Label { text: qsTr("raw ") + manualVm.rawYaw.toFixed(2) + qsTr(" / proc ") + manualVm.yaw.toFixed(2); color: "white"; font.family: "Consolas" }
                     }
                 }
@@ -258,26 +262,26 @@ Rectangle {
                                 Layout.preferredWidth: 220
                                 Layout.preferredHeight: 180
                                 radius: 6
-                                color: "#181818"
-                                border.color: manualVm.active ? "#2C703A" : "#3C3C3C"
+                                color: Theme.listRow
+                                border.color: manualVm.active ? Theme.successBorder : Theme.border
 
                                 Rectangle {
                                     width: parent.width - 24
                                     height: 1
                                     anchors.centerIn: parent
-                                    color: "#3C3C3C"
+                                    color: Theme.border
                                 }
                                 Rectangle {
                                     width: 1
                                     height: parent.height - 24
                                     anchors.centerIn: parent
-                                    color: "#3C3C3C"
+                                    color: Theme.border
                                 }
                                 Rectangle {
                                     width: 18
                                     height: 18
                                     radius: 9
-                                    color: manualVm.active ? "#7FB7E0" : "#777777"
+                                    color: manualVm.active ? Theme.blue : Theme.textMuted
                                     border.color: "white"
                                     x: stickScope.width / 2
                                        + manualVm.roll * (stickScope.width / 2 - 18)
@@ -293,7 +297,7 @@ Rectangle {
                                     anchors.bottom: parent.bottom
                                     anchors.margins: 8
                                     text: qsTr("Roll / Pitch")
-                                    color: "#9A9A9A"
+                                    color: Theme.textSecondary
                                     font.pixelSize: 11
                                 }
                             }
@@ -301,7 +305,7 @@ Rectangle {
                             Label {
                                 text: qsTr("stream ") + manualVm.stateName
                                       + qsTr(" / samples ") + manualVm.totalSamplesSent
-                                color: manualVm.active ? "#A0E060" : "#9A9A9A"
+                                color: manualVm.active ? Theme.success : Theme.textSecondary
                                 font.pixelSize: 12
                             }
                         }
@@ -310,21 +314,21 @@ Rectangle {
                             spacing: 12
                             Layout.preferredWidth: 220
 
-                            Label { text: qsTr("Throttle"); color: "#9A9A9A"; font.bold: true }
+                            Label { text: qsTr("Throttle"); color: Theme.textSecondary; font.bold: true }
                             Rectangle {
                                 id: throttleTrack
                                 Layout.fillWidth: true
                                 height: 18
                                 radius: 9
-                                color: "#181818"
-                                border.color: "#3C3C3C"
+                                color: Theme.listRow
+                                border.color: Theme.border
                                 Rectangle {
                                     anchors.left: parent.left
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
                                     width: parent.width * root.normThrottle()
                                     radius: 9
-                                    color: manualVm.active ? "#A0E060" : "#777777"
+                                    color: manualVm.active ? Theme.success : Theme.textMuted
                                     Behavior on width { NumberAnimation { duration: 80 } }
                                 }
                             }
@@ -334,20 +338,20 @@ Rectangle {
                                 font.family: "Consolas"
                             }
 
-                            Label { text: qsTr("Yaw"); color: "#9A9A9A"; font.bold: true }
+                            Label { text: qsTr("Yaw"); color: Theme.textSecondary; font.bold: true }
                             Rectangle {
                                 id: yawTrack
                                 Layout.fillWidth: true
                                 height: 18
                                 radius: 9
-                                color: "#181818"
-                                border.color: "#3C3C3C"
+                                color: Theme.listRow
+                                border.color: Theme.border
                                 Rectangle {
                                     width: 1
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    color: "#555555"
+                                    color: Theme.border
                                 }
                                 Rectangle {
                                     anchors.verticalCenter: parent.verticalCenter
@@ -357,7 +361,7 @@ Rectangle {
                                        ? parent.width / 2
                                        : parent.width / 2 + manualVm.yaw * parent.width / 2
                                     width: Math.abs(manualVm.yaw) * parent.width / 2
-                                    color: manualVm.active ? "#FFAA33" : "#777777"
+                                    color: manualVm.active ? Theme.warning : Theme.textMuted
                                     Behavior on x { NumberAnimation { duration: 80 } }
                                     Behavior on width { NumberAnimation { duration: 80 } }
                                 }
@@ -375,19 +379,19 @@ Rectangle {
                             rowSpacing: 6
                             Layout.fillWidth: true
 
-                            Label { text: qsTr("Altitude"); color: "#9A9A9A" }
+                            Label { text: qsTr("Altitude"); color: Theme.textSecondary }
                             Label { text: vehicleVm.relativeAltitudeM.toFixed(1) + " m"; color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("Heading"); color: "#9A9A9A" }
+                            Label { text: qsTr("Heading"); color: Theme.textSecondary }
                             Label { text: vehicleVm.headingDeg.toFixed(1) + " deg"; color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("Speed"); color: "#9A9A9A" }
+                            Label { text: qsTr("Speed"); color: Theme.textSecondary }
                             Label { text: vehicleVm.groundSpeedMps.toFixed(2) + " m/s"; color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("Roll"); color: "#9A9A9A" }
+                            Label { text: qsTr("Roll"); color: Theme.textSecondary }
                             Label { text: vehicleVm.rollDeg.toFixed(1) + " deg"; color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("Pitch"); color: "#9A9A9A" }
+                            Label { text: qsTr("Pitch"); color: Theme.textSecondary }
                             Label { text: vehicleVm.pitchDeg.toFixed(1) + " deg"; color: "white"; font.family: "Consolas" }
                         }
                     }
@@ -404,7 +408,7 @@ Rectangle {
 
                         Label {
                             text: qsTr("These values are sent as MAVLink MANUAL_CONTROL only when the active vehicle is UDP SITL.")
-                            color: "#FFAA33"
+                            color: Theme.warning
                             wrapMode: Text.Wrap
                             Layout.fillWidth: true
                             font.pixelSize: 12
@@ -416,22 +420,22 @@ Rectangle {
                             rowSpacing: 6
                             Layout.fillWidth: true
 
-                            Label { text: qsTr("x (pitch)"); color: "#9A9A9A" }
+                            Label { text: qsTr("x (pitch)"); color: Theme.textSecondary }
                             Label { text: manualVm.lastX + qsTr(" / 1000"); color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("y (roll)"); color: "#9A9A9A" }
+                            Label { text: qsTr("y (roll)"); color: Theme.textSecondary }
                             Label { text: manualVm.lastY + qsTr(" / 1000"); color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("z (throttle)"); color: "#9A9A9A" }
+                            Label { text: qsTr("z (throttle)"); color: Theme.textSecondary }
                             Label { text: manualVm.lastZ + qsTr(" / 1000"); color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("r (yaw)"); color: "#9A9A9A" }
+                            Label { text: qsTr("r (yaw)"); color: Theme.textSecondary }
                             Label { text: manualVm.lastR + qsTr(" / 1000"); color: "white"; font.family: "Consolas" }
 
-                            Label { text: qsTr("Joystick"); color: "#9A9A9A" }
+                            Label { text: qsTr("Joystick"); color: Theme.textSecondary }
                             Label {
                                 text: manualVm.joystickConnected ? manualVm.joystickName : qsTr("disconnected")
-                                color: manualVm.joystickConnected ? "#A0E060" : "#FF8080"
+                                color: manualVm.joystickConnected ? Theme.success : Theme.danger
                                 font.bold: true
                             }
                         }

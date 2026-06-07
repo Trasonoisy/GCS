@@ -33,15 +33,15 @@ InfoCard {
             Layout.fillWidth: true
             height: 42
             radius: 4
-            color: missionVm.transferAllowed ? "#19351F" : "#3A2424"
-            border.color: missionVm.transferAllowed ? "#2C703A" : "#7A3A3A"
+            color: missionVm.transferAllowed ? Theme.successSurface : Theme.dangerSurface
+            border.color: missionVm.transferAllowed ? Theme.successBorder : Theme.dangerBorder
             Label {
                 anchors.centerIn: parent
                 width: parent.width - 16
                 text: missionVm.transferAllowed
                       ? qsTr("Transfer target: ") + missionVm.transferTarget
                       : qsTr("Transfer blocked: ") + missionVm.transferBlockedReason
-                color: missionVm.transferAllowed ? "#A0E060" : "#FFAA33"
+                color: missionVm.transferAllowed ? Theme.success : Theme.warning
                 font.bold: true
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
@@ -53,11 +53,11 @@ InfoCard {
             height: missionVm.missionPreviewActive ? 56 : 42
             radius: 4
             color: missionVm.missionPreviewActive
-                   ? "#12283D"
-                   : (missionVm.missionPreviewAllowed ? "#202A24" : "#2A2424")
+                   ? Theme.infoSurface
+                   : (missionVm.missionPreviewAllowed ? Theme.successSurface : Theme.dangerSurface)
             border.color: missionVm.missionPreviewActive
-                          ? "#1F6FEB"
-                          : (missionVm.missionPreviewAllowed ? "#3B6A4A" : "#5A4545")
+                          ? Theme.accent
+                          : (missionVm.missionPreviewAllowed ? Theme.successBorder : Theme.dangerBorder)
 
             ColumnLayout {
                 anchors.fill: parent
@@ -72,8 +72,8 @@ InfoCard {
                              ? qsTr("Preview target: MockVehicle")
                              : qsTr("Preview blocked: ") + missionVm.missionPreviewBlockedReason)
                     color: missionVm.missionPreviewActive
-                           ? "#7DB7FF"
-                           : (missionVm.missionPreviewAllowed ? "#A0E060" : "#FFAA33")
+                           ? Theme.blue
+                           : (missionVm.missionPreviewAllowed ? Theme.success : Theme.warning)
                     font.bold: true
                     wrapMode: Text.Wrap
                     horizontalAlignment: Text.AlignHCenter
@@ -84,12 +84,12 @@ InfoCard {
                     Layout.fillWidth: true
                     height: 6
                     radius: 3
-                    color: "#1F1F1F"
+                    color: Theme.inputBackground
                     Rectangle {
                         width: parent.width * missionVm.missionPreviewProgress
                         height: parent.height
                         radius: parent.radius
-                        color: "#1F6FEB"
+                        color: Theme.accent
                     }
                 }
             }
@@ -101,53 +101,57 @@ InfoCard {
             rowSpacing: 8
             Layout.fillWidth: true
 
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Validate mission")
+                variant: "primary"
                 onClicked: missionVm.validateMission()
             }
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Save plan")
                 enabled: missionVm.itemCount > 0
                 onClicked: saveDialog.open()
             }
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Load plan")
                 onClicked: loadDialog.open()
             }
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Clear plan")
                 enabled: missionVm.itemCount > 0
                 onClicked: missionVm.clearMission()
             }
 
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Simulate mission")
+                variant: "primary"
                 enabled: !missionVm.missionPreviewActive
                          && missionVm.missionPreviewAllowed
                          && missionVm.itemCount > 0
                 onClicked: missionVm.simulateMission()
             }
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Stop simulation")
+                variant: "danger"
                 enabled: missionVm.missionPreviewActive
                 onClicked: missionVm.stopMissionSimulation()
             }
 
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Upload to ") + missionVm.transferTarget
+                variant: "primary"
                 enabled: !missionVm.transferBusy
                          && missionVm.transferAllowed
                          && missionVm.itemCount > 0
                 onClicked: missionVm.uploadToVehicle()
             }
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 text: qsTr("Download from ") + missionVm.transferTarget
                 enabled: !missionVm.transferBusy
@@ -155,10 +159,11 @@ InfoCard {
                 onClicked: missionVm.downloadFromVehicle()
             }
 
-            Button {
+            StyledButton {
                 Layout.fillWidth: true
                 Layout.columnSpan: 2
                 text: qsTr("Cancel transfer")
+                variant: "danger"
                 enabled: missionVm.transferBusy
                 onClicked: missionVm.cancelTransfer()
             }
@@ -167,7 +172,7 @@ InfoCard {
         Label {
             visible: missionVm.itemCount === 0
             text: qsTr("Empty plan: add waypoints before validation or upload.")
-            color: "#FFAA33"
+            color: Theme.warning
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             font.pixelSize: 12
@@ -176,7 +181,7 @@ InfoCard {
         Label {
             visible: missionVm.transferAllowed && !missionVm.vehicleSimulated
             text: qsTr("SITL mission transfer only. Upload/download does not arm, take off, change mode, start mission, land, or RTL.")
-            color: "#9A9A9A"
+            color: Theme.textSecondary
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             font.pixelSize: 11
@@ -186,7 +191,7 @@ InfoCard {
         Label {
             text: qsTr("Vehicle: ") + missionVm.vehicleLabel
                   + (missionVm.vehicleSimulated ? qsTr(" (simulation)") : "")
-            color: missionVm.vehicleSimulated ? "#FFAA33" : "#CCCCCC"
+            color: missionVm.vehicleSimulated ? Theme.warning : Theme.textPrimary
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }
@@ -196,7 +201,7 @@ InfoCard {
                   ? qsTr("File: ") + missionVm.currentFilePath
                                    + (missionVm.dirty ? qsTr(" (modified)") : "")
                   : qsTr("File: unsaved plan") + (missionVm.dirty ? qsTr(" (modified)") : "")
-            color: "#9A9A9A"
+            color: Theme.textSecondary
             wrapMode: Text.WrapAnywhere
             Layout.fillWidth: true
             font.pixelSize: 12

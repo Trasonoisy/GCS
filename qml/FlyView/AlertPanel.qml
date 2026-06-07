@@ -16,13 +16,13 @@ InfoCard {
             Layout.fillWidth: true
             Label {
                 text: qsTr("Runtime audit events")
-                color: "#CCCCCC"
+                color: Theme.textPrimary
                 font.bold: true
                 Layout.fillWidth: true
             }
             Label {
                 text: logVm.eventCount + qsTr(" entries")
-                color: "#9A9A9A"
+                color: Theme.textSecondary
                 font.pixelSize: 12
             }
         }
@@ -37,7 +37,7 @@ InfoCard {
             delegate: Rectangle {
                 width: list.width
                 implicitHeight: line.implicitHeight + 8
-                color: index % 2 === 0 ? "#181818" : "#202020"
+                color: index % 2 === 0 ? Theme.listRow : Theme.listRowAlt
                 Label {
                     id: line
                     anchors.left: parent.left
@@ -46,9 +46,9 @@ InfoCard {
                     anchors.leftMargin: 8
                     anchors.rightMargin: 8
                     text: modelData
-                    color: modelData.indexOf("WARN/") >= 0 ? "#FFCC66"
-                          : modelData.indexOf("ERROR/") >= 0 ? "#FF8080"
-                          : "#DDDDDD"
+                    color: modelData.indexOf("WARN/") >= 0 ? Theme.warning
+                          : modelData.indexOf("ERROR/") >= 0 ? Theme.danger
+                          : Theme.textPrimary
                     wrapMode: Text.WrapAnywhere
                     font.pixelSize: 12
                 }
@@ -58,7 +58,7 @@ InfoCard {
                 anchors.centerIn: parent
                 visible: list.count === 0
                 text: qsTr("No audit events yet. Connect a link, validate a mission, or toggle manual control.")
-                color: "#777777"
+                color: Theme.textMuted
                 font.italic: true
                 wrapMode: Text.Wrap
                 width: parent.width - 32
@@ -68,7 +68,7 @@ InfoCard {
             onCountChanged: positionViewAtEnd()
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: "#3C3C3C" }
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
         RowLayout {
             Layout.fillWidth: true
@@ -78,17 +78,17 @@ InfoCard {
                 text: qsTr("JSONL: ") + (logVm.currentLogPath !== ""
                                       ? logVm.currentLogPath
                                       : qsTr("(file logging disabled)"))
-                color: logVm.currentLogPath !== "" ? "#9A9A9A" : "#FFAA33"
+                color: logVm.currentLogPath !== "" ? Theme.textSecondary : Theme.warning
                 font.pixelSize: 11
                 wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
             }
-            Button {
+            StyledButton {
                 text: qsTr("Open folder")
                 enabled: logVm.currentLogPath !== ""
                 onClicked: logVm.openLogFolder()
             }
-            Button {
+            StyledButton {
                 text: qsTr("Copy path")
                 enabled: logVm.currentLogPath !== ""
                 onClicked: logVm.copyLogPath()

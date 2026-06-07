@@ -22,7 +22,7 @@ InfoCard {
         Label {
             visible: !root.hasItem
             text: qsTr("Select a waypoint to edit it. TAKEOFF, LAND, RTL, and LOITER here are mission item types, not immediate commands.")
-            color: "#FFAA33"
+            color: Theme.warning
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             font.pixelSize: 12
@@ -36,8 +36,8 @@ InfoCard {
             enabled: root.hasItem
             opacity: enabled ? 1.0 : 0.45
 
-            Label { text: qsTr("Command"); color: "#9A9A9A" }
-            ComboBox {
+            Label { text: qsTr("Command"); color: Theme.textSecondary }
+            StyledComboBox {
                 Layout.fillWidth: true
                 model: [
                     { text: "WAYPOINT", value: 16 },
@@ -57,51 +57,51 @@ InfoCard {
                 onActivated: (idx) => root.update("command", model[idx].value)
             }
 
-            Label { text: qsTr("Frame"); color: "#9A9A9A" }
+            Label { text: qsTr("Frame"); color: Theme.textSecondary }
             Label { text: root.hasItem ? item.frameName : ""; color: "white"; wrapMode: Text.WrapAnywhere }
 
-            Label { text: qsTr("Latitude (deg)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Latitude (deg)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 text: root.hasItem ? Number(item.latitudeDeg).toFixed(7) : ""
                 validator: DoubleValidator { bottom: -90; top: 90; decimals: 7 }
                 onEditingFinished: if (root.hasItem) root.update("latitudeDeg", parseFloat(text))
             }
 
-            Label { text: qsTr("Longitude (deg)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Longitude (deg)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 text: root.hasItem ? Number(item.longitudeDeg).toFixed(7) : ""
                 validator: DoubleValidator { bottom: -180; top: 180; decimals: 7 }
                 onEditingFinished: if (root.hasItem) root.update("longitudeDeg", parseFloat(text))
             }
 
-            Label { text: qsTr("Altitude (m)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Altitude (m)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 text: root.hasItem ? Number(item.altitudeM).toFixed(2) : ""
                 validator: DoubleValidator { bottom: -500; top: 10000; decimals: 2 }
                 onEditingFinished: if (root.hasItem) root.update("altitudeM", parseFloat(text))
             }
 
-            Label { text: qsTr("Hold time (s)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Hold time (s)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 text: root.hasItem ? Number(item.holdTimeSec).toFixed(1) : ""
                 validator: DoubleValidator { bottom: 0; top: 3600; decimals: 1 }
                 onEditingFinished: if (root.hasItem) root.update("holdTimeSec", parseFloat(text))
             }
 
-            Label { text: qsTr("Accept radius (m)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Accept radius (m)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 text: root.hasItem ? Number(item.acceptanceRadiusM).toFixed(2) : ""
                 validator: DoubleValidator { bottom: 0; top: 500; decimals: 2 }
                 onEditingFinished: if (root.hasItem) root.update("acceptanceRadiusM", parseFloat(text))
             }
 
-            Label { text: qsTr("Yaw (deg)"); color: "#9A9A9A" }
-            TextField {
+            Label { text: qsTr("Yaw (deg)"); color: Theme.textSecondary }
+            StyledTextField {
                 Layout.fillWidth: true
                 placeholderText: qsTr("(unchanged)")
                 text: {
@@ -116,8 +116,8 @@ InfoCard {
                 }
             }
 
-            Label { text: qsTr("Auto-continue"); color: "#9A9A9A" }
-            CheckBox {
+            Label { text: qsTr("Auto-continue"); color: Theme.textSecondary }
+            StyledCheckBox {
                 checked: root.hasItem ? item.autocontinue : true
                 onToggled: if (root.hasItem) root.update("autocontinue", checked)
             }

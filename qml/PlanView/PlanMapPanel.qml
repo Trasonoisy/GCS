@@ -42,7 +42,7 @@ InfoCard {
         MapPolyline {
             id: missionPath
             line.width: 3
-            line.color: "#1F6FEB"
+            line.color: Theme.accent
             path: {
                 const out = []
                 const items = missionVm.items
@@ -67,7 +67,7 @@ InfoCard {
                     id: marker
                     width: 28; height: 28; radius: 14
                     color: (missionVm.selectedIndex === modelData.index)
-                           ? "#FFAA33" : "#1F6FEB"
+                           ? Theme.warning : Theme.accent
                     border.color: "white"; border.width: 2
                     Label {
                         anchors.centerIn: parent
@@ -106,14 +106,14 @@ InfoCard {
         anchors.bottom: parent.bottom
         anchors.left:   parent.left
         anchors.margins: 8
-        color: "#222222"; opacity: 0.85; radius: 4
-        border.color: "#555555"
+        color: Theme.surfaceElevated; opacity: 0.85; radius: 4
+        border.color: Theme.border
         width: hintLabel.implicitWidth + 16
         height: hintLabel.implicitHeight + 8
         Label {
             id: hintLabel
             anchors.centerIn: parent
-            color: "#CCCCCC"
+            color: Theme.textPrimary
             font.pixelSize: 11
             text: qsTr("Double-click on the map to add a waypoint • click a marker to select")
         }

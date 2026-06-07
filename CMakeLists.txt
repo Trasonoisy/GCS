@@ -60,6 +60,10 @@ if(QT_KNOWN_POLICY_QTP0004)
     qt_policy(SET QTP0004 NEW)
 endif()
 
+set_source_files_properties(qml/Common/Theme.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
 enable_testing()
 
 add_subdirectory(src)
@@ -88,6 +92,14 @@ qt_add_qml_module(LabGCSApp
         qml/PlanView/ValidationPanel.qml
         qml/ManualView/ManualControlPanel.qml
         qml/Common/InfoCard.qml
+        qml/Common/Theme.qml
+        qml/Common/StyledButton.qml
+        qml/Common/StyledTextField.qml
+        qml/Common/StyledComboBox.qml
+        qml/Common/StyledCheckBox.qml
+        qml/Common/StyledSlider.qml
+        qml/Common/StyledScrollBar.qml
+        qml/Common/StyledProgressBar.qml
         qml/Common/SimulationBanner.qml
         qml/Common/HardwareModeBanner.qml
         qml/Common/MapView.qml

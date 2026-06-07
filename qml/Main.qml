@@ -15,6 +15,18 @@ ApplicationWindow {
     height: 760
     visible: true
     title: qsTr("Lab GCS MVP - Simulation, SITL, Hardware Read-Only")
+    color: Theme.appBackground
+    font.family: Theme.fontFamily
+
+    palette.window: Theme.appBackground
+    palette.windowText: Theme.textPrimary
+    palette.base: Theme.inputBackground
+    palette.alternateBase: Theme.surfaceRaised
+    palette.text: Theme.textPrimary
+    palette.button: Theme.surfaceElevated
+    palette.buttonText: Theme.textPrimary
+    palette.highlight: Theme.accent
+    palette.highlightedText: "white"
 
     StackView {
         id: nav

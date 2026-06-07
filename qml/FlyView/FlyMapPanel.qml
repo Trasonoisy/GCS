@@ -59,7 +59,7 @@ InfoCard {
 
         MapPolyline {
             line.width: 3
-            line.color: "#1F6FEB"
+            line.color: Theme.accent
             opacity: 0.85
             path: {
                 const out = []
@@ -84,7 +84,7 @@ InfoCard {
                 sourceItem: Rectangle {
                     id: dot
                     width: 22; height: 22; radius: 11
-                    color: "#1F6FEB"; opacity: 0.9
+                    color: Theme.accent; opacity: 0.9
                     border.color: "white"; border.width: 2
                     Label {
                         anchors.centerIn: parent
@@ -136,7 +136,7 @@ InfoCard {
                 Label {
                     anchors.centerIn: parent
                     text: "\u25B2"
-                    color: vehicleVm.armed ? "#FF5555" : "#FFAA33"
+                    color: vehicleVm.armed ? Theme.danger : Theme.warning
                     font.bold: true
                     font.pixelSize: 32
                     style: Text.Outline
@@ -153,8 +153,8 @@ InfoCard {
         anchors.bottom: parent.bottom
         anchors.left:   parent.left
         anchors.margins: 8
-        color: "#222222"; opacity: 0.9; radius: 4
-        border.color: "#555555"
+        color: Theme.surfaceElevated; opacity: 0.9; radius: 4
+        border.color: Theme.border
         width: row.implicitWidth + 16
         height: row.implicitHeight + 8
 
@@ -163,36 +163,24 @@ InfoCard {
             anchors.centerIn: parent
             spacing: 10
 
-            CheckBox {
+            StyledCheckBox {
                 text: qsTr("Follow vehicle")
                 checked: root.followVehicle
                 onToggled: root.followVehicle = checked
-                contentItem: Label {
-                    text: parent.text
-                    color: "white"
-                    leftPadding: parent.indicator.width + 6
-                    verticalAlignment: Text.AlignVCenter
-                }
             }
 
-            CheckBox {
+            StyledCheckBox {
                 text: qsTr("Show trail")
                 checked: root.showTrail
                 onToggled: root.showTrail = checked
-                contentItem: Label {
-                    text: parent.text
-                    color: "white"
-                    leftPadding: parent.indicator.width + 6
-                    verticalAlignment: Text.AlignVCenter
-                }
             }
 
-            Button {
+            StyledButton {
                 text: qsTr("Clear trail")
                 onClicked: vehicleVm.clearTrail()
             }
 
-            Button {
+            StyledButton {
                 text: qsTr("Fit plan")
                 enabled: missionVm.itemCount > 0
                 onClicked: {
@@ -213,8 +201,8 @@ InfoCard {
         anchors.bottom: parent.bottom
         anchors.right:  parent.right
         anchors.margins: 8
-        color: "#222222"; opacity: 0.85; radius: 4
-        border.color: "#555555"
+        color: Theme.surfaceElevated; opacity: 0.85; radius: 4
+        border.color: Theme.border
         width: posLabel.implicitWidth + 16
         height: posLabel.implicitHeight + 8
         Label {

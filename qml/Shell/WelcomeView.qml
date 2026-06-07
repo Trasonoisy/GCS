@@ -9,7 +9,7 @@ import LabGCS
 // running by the time this screen appears (see src/App/main.cpp).
 Rectangle {
     id: root
-    color: "#212121"
+    color: Theme.appBackground
 
     signal startMock()
     signal startConnect()
@@ -32,13 +32,13 @@ Rectangle {
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     width: 56; height: 56; radius: 28
-                    color: "#2f2f2f"
-                    border.color: "#3f3f46"
+                    color: Theme.surfaceElevated
+                    border.color: Theme.border
                     border.width: 1
                     Label {
                         anchors.centerIn: parent
                         text: "LG"
-                        color: "#ECECF1"
+                        color: Theme.textPrimary
                         font.pixelSize: 20
                         font.weight: Font.DemiBold
                     }
@@ -47,14 +47,14 @@ Rectangle {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("Lab GCS")
-                    color: "#ECECF1"
+                    color: Theme.textPrimary
                     font.pixelSize: 30
                     font.weight: Font.Medium
                 }
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("How would you like to start?")
-                    color: "#8e8ea0"
+                    color: Theme.textSecondary
                     font.pixelSize: 15
                 }
             }
@@ -70,8 +70,8 @@ Rectangle {
                     Layout.preferredWidth: 280
                     Layout.preferredHeight: 160
                     radius: 14
-                    color: mockMA.containsMouse ? "#363636" : "#2f2f2f"
-                    border.color: "#3f3f46"
+                    color: mockMA.containsMouse ? Theme.hoverSurface : Theme.surfaceRaised
+                    border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -82,10 +82,10 @@ Rectangle {
 
                         RowLayout {
                             spacing: 8
-                            Rectangle { width: 8; height: 8; radius: 4; color: "#FF8A00" }
+                            Rectangle { width: 8; height: 8; radius: 4; color: Theme.warning }
                             Label {
                                 text: qsTr("Mock")
-                                color: "#FF8A00"
+                                color: Theme.warning
                                 font.pixelSize: 11
                                 font.weight: Font.DemiBold
                             }
@@ -93,7 +93,7 @@ Rectangle {
 
                         Label {
                             text: qsTr("Use the simulated vehicle")
-                            color: "#ECECF1"
+                            color: Theme.textPrimary
                             font.pixelSize: 16
                             font.weight: Font.Medium
                             Layout.fillWidth: true
@@ -101,7 +101,7 @@ Rectangle {
                         }
                         Label {
                             text: qsTr("Skip the connection step and fly the built-in mock without opening any real link.")
-                            color: "#8e8ea0"
+                            color: Theme.textSecondary
                             font.pixelSize: 12
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -124,8 +124,8 @@ Rectangle {
                     Layout.preferredWidth: 280
                     Layout.preferredHeight: 160
                     radius: 14
-                    color: connMA.containsMouse ? "#363636" : "#2f2f2f"
-                    border.color: "#3f3f46"
+                    color: connMA.containsMouse ? Theme.hoverSurface : Theme.surfaceRaised
+                    border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -136,10 +136,10 @@ Rectangle {
 
                         RowLayout {
                             spacing: 8
-                            Rectangle { width: 8; height: 8; radius: 4; color: "#1F6FEB" }
+                            Rectangle { width: 8; height: 8; radius: 4; color: Theme.accent }
                             Label {
                                 text: qsTr("SITL or hardware")
-                                color: "#7FB7E0"
+                                color: Theme.blue
                                 font.pixelSize: 11
                                 font.weight: Font.DemiBold
                             }
@@ -147,7 +147,7 @@ Rectangle {
 
                         Label {
                             text: qsTr("Connect to a real link")
-                            color: "#ECECF1"
+                            color: Theme.textPrimary
                             font.pixelSize: 16
                             font.weight: Font.Medium
                             Layout.fillWidth: true
@@ -155,7 +155,7 @@ Rectangle {
                         }
                         Label {
                             text: qsTr("Open a UDP listener for SITL or a serial port for read-only hardware telemetry.")
-                            color: "#8e8ea0"
+                            color: Theme.textSecondary
                             font.pixelSize: 12
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -184,14 +184,14 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     text: qsTr("This research GCS cannot arm, take off, land, RTL, override RC, or send real manual control.")
-                    color: "#6e6e80"
+                    color: Theme.textMuted
                     font.pixelSize: 11
                 }
                 Label {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     text: qsTr("Mission transfer is allowed for Mock and SITL only.")
-                    color: "#6e6e80"
+                    color: Theme.textMuted
                     font.pixelSize: 11
                 }
             }
@@ -203,7 +203,7 @@ Rectangle {
             anchors.bottom: parent.bottom
             anchors.margins: 12
             text: qsTr("Map tiles . OpenStreetMap contributors")
-            color: "#565669"
+            color: Theme.textMuted
             font.pixelSize: 10
         }
     }
