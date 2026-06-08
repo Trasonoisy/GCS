@@ -29,19 +29,14 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: 16
 
-                Rectangle {
+                Image {
                     Layout.alignment: Qt.AlignHCenter
-                    width: 56; height: 56; radius: 28
-                    color: Theme.surfaceElevated
-                    border.color: Theme.border
-                    border.width: 1
-                    Label {
-                        anchors.centerIn: parent
-                        text: "LG"
-                        color: Theme.textPrimary
-                        font.pixelSize: 20
-                        font.weight: Font.DemiBold
-                    }
+                    Layout.preferredWidth: 72
+                    Layout.preferredHeight: 72
+                    source: "../assets/logo.png"
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: true
                 }
 
                 Label {

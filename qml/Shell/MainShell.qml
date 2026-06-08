@@ -87,12 +87,14 @@ Rectangle {
                         color: Theme.surfaceElevated
                         border.color: Theme.border
                         border.width: 1
-                        Label {
+                        Image {
                             anchors.centerIn: parent
-                            text: "LG"
-                            color: Theme.textPrimary
-                            font.pixelSize: 12
-                            font.weight: Font.DemiBold
+                            width: 22
+                            height: 22
+                            source: "../assets/logo.png"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
                         }
                     }
                     Label {

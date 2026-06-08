@@ -108,4 +108,6 @@ qt_add_qml_module(LabGCSApp
         qml/Shell/WelcomeView.qml
         qml/Shell/ConnectView.qml
         qml/Shell/MainShell.qml
+    RESOURCES
+        qml/assets/logo.png
 )
