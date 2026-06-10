@@ -8,6 +8,8 @@ InfoCard {
     id: root
     title: qsTr("Mission Actions")
 
+    readonly property int compactButtonHeight: 34
+
     FileDialog {
         id: saveDialog
         title: qsTr("Save mission")
@@ -27,107 +29,133 @@ InfoCard {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: 8
+        spacing: Theme.gapSm
 
-        Rectangle {
+        GridLayout {
             Layout.fillWidth: true
-            height: 42
-            radius: 4
-            color: missionVm.transferAllowed ? Theme.successSurface : Theme.dangerSurface
-            border.color: missionVm.transferAllowed ? Theme.successBorder : Theme.dangerBorder
-            Label {
-                anchors.centerIn: parent
-                width: parent.width - 16
-                text: missionVm.transferAllowed
-                      ? qsTr("Transfer target: ") + missionVm.transferTarget
-                      : qsTr("Transfer blocked: ") + missionVm.transferBlockedReason
-                color: missionVm.transferAllowed ? Theme.success : Theme.warning
-                font.bold: true
-                wrapMode: Text.Wrap
-                horizontalAlignment: Text.AlignHCenter
-            }
-        }
+            columns: 2
+            columnSpacing: Theme.gapSm
+            rowSpacing: Theme.gapSm
 
-        Rectangle {
-            Layout.fillWidth: true
-            height: missionVm.missionPreviewActive ? 56 : 42
-            radius: 4
-            color: missionVm.missionPreviewActive
-                   ? Theme.infoSurface
-                   : (missionVm.missionPreviewAllowed ? Theme.successSurface : Theme.dangerSurface)
-            border.color: missionVm.missionPreviewActive
-                          ? Theme.accent
-                          : (missionVm.missionPreviewAllowed ? Theme.successBorder : Theme.dangerBorder)
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+                radius: Theme.radiusSm
+                color: missionVm.transferAllowed ? Theme.successSurface : Theme.dangerSurface
+                border.color: missionVm.transferAllowed ? Theme.successBorder : Theme.dangerBorder
 
                 Label {
-                    Layout.fillWidth: true
-                    text: missionVm.missionPreviewActive
-                          ? qsTr("Preview running: ") + Math.round(missionVm.missionPreviewProgress * 100) + "%"
-                          : (missionVm.missionPreviewAllowed
-                             ? qsTr("Preview target: MockVehicle")
-                             : qsTr("Preview blocked: ") + missionVm.missionPreviewBlockedReason)
-                    color: missionVm.missionPreviewActive
-                           ? Theme.blue
-                           : (missionVm.missionPreviewAllowed ? Theme.success : Theme.warning)
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    text: missionVm.transferAllowed
+                          ? qsTr("Target: ") + missionVm.transferTarget
+                          : qsTr("Blocked: ") + missionVm.transferBlockedReason
+                    color: missionVm.transferAllowed ? Theme.success : Theme.warning
                     font.bold: true
-                    wrapMode: Text.Wrap
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
                     horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
+            }
 
-                Rectangle {
-                    visible: missionVm.missionPreviewActive
-                    Layout.fillWidth: true
-                    height: 6
-                    radius: 3
-                    color: Theme.inputBackground
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 40
+                radius: Theme.radiusSm
+                color: missionVm.missionPreviewActive
+                       ? Theme.infoSurface
+                       : (missionVm.missionPreviewAllowed ? Theme.successSurface : Theme.dangerSurface)
+                border.color: missionVm.missionPreviewActive
+                              ? Theme.accent
+                              : (missionVm.missionPreviewAllowed ? Theme.successBorder : Theme.dangerBorder)
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 4
+
+                    Label {
+                        Layout.fillWidth: true
+                        text: missionVm.missionPreviewActive
+                              ? qsTr("Preview: ") + Math.round(missionVm.missionPreviewProgress * 100) + "%"
+                              : (missionVm.missionPreviewAllowed
+                                 ? qsTr("Preview: MockVehicle")
+                                 : qsTr("Preview blocked"))
+                        color: missionVm.missionPreviewActive
+                               ? Theme.blue
+                               : (missionVm.missionPreviewAllowed ? Theme.success : Theme.warning)
+                        font.bold: true
+                        font.pixelSize: 12
+                        elide: Text.ElideRight
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
                     Rectangle {
-                        width: parent.width * missionVm.missionPreviewProgress
-                        height: parent.height
-                        radius: parent.radius
-                        color: Theme.accent
+                        visible: missionVm.missionPreviewActive
+                        Layout.fillWidth: true
+                        height: 4
+                        radius: 2
+                        color: Theme.inputBackground
+
+                        Rectangle {
+                            width: parent.width * missionVm.missionPreviewProgress
+                            height: parent.height
+                            radius: parent.radius
+                            color: Theme.accent
+                        }
                     }
                 }
+            }
+
+            Label {
+                visible: !missionVm.missionPreviewActive && !missionVm.missionPreviewAllowed
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                text: qsTr("Preview blocked: ") + missionVm.missionPreviewBlockedReason
+                color: Theme.warning
+                wrapMode: Text.Wrap
+                font.pixelSize: 11
             }
         }
 
         GridLayout {
-            columns: 2
-            columnSpacing: 8
-            rowSpacing: 8
             Layout.fillWidth: true
+            columns: 3
+            columnSpacing: 6
+            rowSpacing: 6
 
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Validate mission")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Validate")
                 variant: "primary"
                 onClicked: missionVm.validateMission()
             }
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Save plan")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Save")
                 enabled: missionVm.itemCount > 0
                 onClicked: saveDialog.open()
             }
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Load plan")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Load")
                 onClicked: loadDialog.open()
             }
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Clear plan")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Clear")
                 enabled: missionVm.itemCount > 0
                 onClicked: missionVm.clearMission()
             }
-
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Simulate mission")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Simulate")
                 variant: "primary"
                 enabled: !missionVm.missionPreviewActive
                          && missionVm.missionPreviewAllowed
@@ -136,15 +164,16 @@ InfoCard {
             }
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Stop simulation")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Stop sim")
                 variant: "danger"
                 enabled: missionVm.missionPreviewActive
                 onClicked: missionVm.stopMissionSimulation()
             }
-
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Upload to ") + missionVm.transferTarget
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Upload")
                 variant: "primary"
                 enabled: !missionVm.transferBusy
                          && missionVm.transferAllowed
@@ -153,58 +182,83 @@ InfoCard {
             }
             StyledButton {
                 Layout.fillWidth: true
-                text: qsTr("Download from ") + missionVm.transferTarget
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Download")
                 enabled: !missionVm.transferBusy
                          && missionVm.transferAllowed
                 onClicked: missionVm.downloadFromVehicle()
             }
-
             StyledButton {
                 Layout.fillWidth: true
-                Layout.columnSpan: 2
-                text: qsTr("Cancel transfer")
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Cancel")
                 variant: "danger"
                 enabled: missionVm.transferBusy
                 onClicked: missionVm.cancelTransfer()
             }
         }
 
-        Label {
-            visible: missionVm.itemCount === 0
-            text: qsTr("Empty plan: add waypoints before validation or upload.")
-            color: Theme.warning
-            wrapMode: Text.Wrap
+        Rectangle {
             Layout.fillWidth: true
-            font.pixelSize: 12
+            height: 1
+            color: Theme.border
         }
 
-        Label {
-            visible: missionVm.transferAllowed && !missionVm.vehicleSimulated
-            text: qsTr("SITL mission transfer only. Upload/download does not arm, take off, change mode, start mission, land, or RTL.")
-            color: Theme.textSecondary
-            wrapMode: Text.Wrap
+        GridLayout {
             Layout.fillWidth: true
-            font.pixelSize: 11
-            font.italic: true
-        }
+            columns: 2
+            columnSpacing: Theme.gapSm
+            rowSpacing: 4
 
-        Label {
-            text: qsTr("Vehicle: ") + missionVm.vehicleLabel
-                  + (missionVm.vehicleSimulated ? qsTr(" (simulation)") : "")
-            color: missionVm.vehicleSimulated ? Theme.warning : Theme.textPrimary
-            wrapMode: Text.Wrap
-            Layout.fillWidth: true
-        }
+            Label {
+                visible: missionVm.itemCount === 0
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                text: qsTr("Empty plan: add waypoints before validation or upload.")
+                color: Theme.warning
+                elide: Text.ElideRight
+                font.pixelSize: 12
+            }
 
-        Label {
-            text: missionVm.currentFilePath !== ""
-                  ? qsTr("File: ") + missionVm.currentFilePath
-                                   + (missionVm.dirty ? qsTr(" (modified)") : "")
-                  : qsTr("File: unsaved plan") + (missionVm.dirty ? qsTr(" (modified)") : "")
-            color: Theme.textSecondary
-            wrapMode: Text.WrapAnywhere
-            Layout.fillWidth: true
-            font.pixelSize: 12
+            Label {
+                visible: missionVm.transferAllowed && !missionVm.vehicleSimulated
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                text: qsTr("SITL transfer only. Upload/download does not arm, take off, start mission, land, or RTL.")
+                color: Theme.textSecondary
+                elide: Text.ElideRight
+                font.pixelSize: 11
+                font.italic: true
+            }
+
+            Label {
+                text: qsTr("Vehicle")
+                color: Theme.textMuted
+                font.pixelSize: 11
+            }
+            Label {
+                Layout.fillWidth: true
+                text: missionVm.vehicleLabel
+                      + (missionVm.vehicleSimulated ? qsTr(" (simulation)") : "")
+                color: missionVm.vehicleSimulated ? Theme.warning : Theme.textPrimary
+                elide: Text.ElideRight
+                font.pixelSize: 12
+            }
+
+            Label {
+                text: qsTr("File")
+                color: Theme.textMuted
+                font.pixelSize: 11
+            }
+            Label {
+                Layout.fillWidth: true
+                text: missionVm.currentFilePath !== ""
+                      ? missionVm.currentFilePath + (missionVm.dirty ? qsTr(" (modified)") : "")
+                      : qsTr("unsaved plan") + (missionVm.dirty ? qsTr(" (modified)") : "")
+                color: Theme.textSecondary
+                elide: Text.ElideMiddle
+                font.pixelSize: 11
+            }
         }
     }
 }

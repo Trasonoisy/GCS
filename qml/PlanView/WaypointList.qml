@@ -7,6 +7,8 @@ InfoCard {
     id: root
     title: qsTr("Waypoints")
 
+    signal editRequested(int index)
+
     ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -26,58 +28,71 @@ InfoCard {
                 width: list.width
                 height: 24
                 color: Theme.listRow
-                Row {
+                RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     anchors.rightMargin: 8
-                    spacing: 12
-                    Label { text: qsTr("Seq"); color: Theme.textMuted; width: 36; font.pixelSize: 11 }
-                    Label { text: qsTr("Command"); color: Theme.textMuted; width: 110; font.pixelSize: 11 }
-                    Label { text: qsTr("Coordinates"); color: Theme.textMuted; width: 190; font.pixelSize: 11 }
-                    Label { text: qsTr("Alt"); color: Theme.textMuted; font.pixelSize: 11 }
+                    spacing: 10
+                    Label { text: qsTr("Seq"); color: Theme.textMuted; Layout.preferredWidth: 36; font.pixelSize: 11 }
+                    Label { text: qsTr("Command"); color: Theme.textMuted; Layout.preferredWidth: 112; font.pixelSize: 11 }
+                    Label { text: qsTr("Coordinates"); color: Theme.textMuted; Layout.fillWidth: true; font.pixelSize: 11 }
+                    Label { text: qsTr("Alt"); color: Theme.textMuted; Layout.preferredWidth: 74; font.pixelSize: 11 }
+                    Label { text: qsTr("Edit"); color: Theme.textMuted; Layout.preferredWidth: 58; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter }
                 }
             }
 
             delegate: Rectangle {
                 width: list.width
-                height: 38
+                height: 42
                 color: "transparent"
-                Row {
+
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.rightMargin: 70
+                    onClicked: missionVm.selectedIndex = index
+                }
+
+                RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     anchors.rightMargin: 8
-                    spacing: 12
+                    spacing: 10
                     Label {
                         text: "#" + (modelData.seq + 1)
                         color: Theme.textSecondary
-                        width: 36
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.preferredWidth: 36
                     }
                     Label {
                         text: modelData.commandName
                         color: "white"
                         font.bold: true
-                        width: 110
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.preferredWidth: 112
                         elide: Text.ElideRight
                     }
                     Label {
                         text: Number(modelData.latitudeDeg).toFixed(5) + ", "
                               + Number(modelData.longitudeDeg).toFixed(5)
                         color: Theme.textPrimary
-                        width: 190
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.fillWidth: true
                         elide: Text.ElideRight
                     }
                     Label {
                         text: Number(modelData.altitudeM).toFixed(1) + " m"
                         color: Theme.textSecondary
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.preferredWidth: 74
+                        elide: Text.ElideRight
                     }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: missionVm.selectedIndex = index
+                    StyledButton {
+                        text: qsTr("Edit")
+                        Layout.preferredWidth: 58
+                        Layout.preferredHeight: 30
+                        horizontalPadding: 8
+                        verticalPadding: 4
+                        onClicked: {
+                            missionVm.selectedIndex = index
+                            root.editRequested(index)
+                        }
+                    }
                 }
             }
 

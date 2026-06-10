@@ -71,6 +71,7 @@ InfoCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
+            ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
             model: missionVm.validationErrors.concat(missionVm.validationWarnings)
             delegate: Rectangle {
                 width: validationList.width

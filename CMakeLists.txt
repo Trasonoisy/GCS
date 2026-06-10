@@ -87,6 +87,7 @@ qt_add_qml_module(LabGCSApp
         qml/FlyView/ConnectionPanel.qml
         qml/PlanView/PlanView.qml
         qml/PlanView/WaypointList.qml
+        qml/PlanView/WaypointEditDialog.qml
         qml/PlanView/WaypointEditor.qml
         qml/PlanView/MissionActions.qml
         qml/PlanView/ValidationPanel.qml
