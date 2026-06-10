@@ -113,5 +113,6 @@ qt_add_qml_module(LabGCSApp
         qml/assets/logo.png
         qml/assets/home.png
         qml/assets/link.png
+        qml/assets/expand_content.png
         qml/assets/vehicle_marker_black.png
 )
