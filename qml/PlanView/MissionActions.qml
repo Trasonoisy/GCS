@@ -135,26 +135,6 @@ InfoCard {
             StyledButton {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.compactButtonHeight
-                text: qsTr("Save")
-                enabled: missionVm.itemCount > 0
-                onClicked: saveDialog.open()
-            }
-            StyledButton {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.compactButtonHeight
-                text: qsTr("Load")
-                onClicked: loadDialog.open()
-            }
-            StyledButton {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.compactButtonHeight
-                text: qsTr("Clear")
-                enabled: missionVm.itemCount > 0
-                onClicked: missionVm.clearMission()
-            }
-            StyledButton {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.compactButtonHeight
                 text: qsTr("Simulate")
                 variant: "primary"
                 enabled: !missionVm.missionPreviewActive
@@ -170,6 +150,7 @@ InfoCard {
                 enabled: missionVm.missionPreviewActive
                 onClicked: missionVm.stopMissionSimulation()
             }
+
             StyledButton {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.compactButtonHeight
@@ -195,6 +176,28 @@ InfoCard {
                 variant: "danger"
                 enabled: missionVm.transferBusy
                 onClicked: missionVm.cancelTransfer()
+            }
+
+            StyledButton {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Save")
+                enabled: missionVm.itemCount > 0
+                onClicked: saveDialog.open()
+            }
+            StyledButton {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Load")
+                onClicked: loadDialog.open()
+            }
+            StyledButton {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.compactButtonHeight
+                text: qsTr("Clear")
+                variant: "danger"
+                enabled: missionVm.itemCount > 0
+                onClicked: missionVm.clearMission()
             }
         }
 

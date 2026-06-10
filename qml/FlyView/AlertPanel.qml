@@ -10,7 +10,7 @@ InfoCard {
     ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        spacing: 8
+        spacing: Theme.gapSm
 
         RowLayout {
             Layout.fillWidth: true
@@ -32,6 +32,7 @@ InfoCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
+            ScrollBar.vertical: StyledScrollBar { policy: ScrollBar.AsNeeded }
 
             model: logVm.recentEvents
             delegate: Rectangle {
@@ -70,7 +71,7 @@ InfoCard {
 
         Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
 
-        RowLayout {
+        ColumnLayout {
             Layout.fillWidth: true
             spacing: 6
 
@@ -80,18 +81,26 @@ InfoCard {
                                       : qsTr("(file logging disabled)"))
                 color: logVm.currentLogPath !== "" ? Theme.textSecondary : Theme.warning
                 font.pixelSize: 11
-                wrapMode: Text.WrapAnywhere
+                elide: Text.ElideMiddle
                 Layout.fillWidth: true
             }
-            StyledButton {
-                text: qsTr("Open folder")
-                enabled: logVm.currentLogPath !== ""
-                onClicked: logVm.openLogFolder()
-            }
-            StyledButton {
-                text: qsTr("Copy path")
-                enabled: logVm.currentLogPath !== ""
-                onClicked: logVm.copyLogPath()
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                StyledButton {
+                    text: qsTr("Open folder")
+                    Layout.fillWidth: true
+                    enabled: logVm.currentLogPath !== ""
+                    onClicked: logVm.openLogFolder()
+                }
+                StyledButton {
+                    text: qsTr("Copy path")
+                    Layout.fillWidth: true
+                    enabled: logVm.currentLogPath !== ""
+                    onClicked: logVm.copyLogPath()
+                }
             }
         }
     }

@@ -12,52 +12,56 @@ Rectangle {
         anchors.fill: parent
     }
 
-    RowLayout {
+    GridLayout {
         anchors.fill: parent
         anchors.margins: Theme.gapMd
-        spacing: Theme.gapMd
+        columns: 2
+        columnSpacing: Theme.gapMd
+        rowSpacing: Theme.gapMd
 
-        ColumnLayout {
+        PlanMapPanel {
+            Layout.row: 0
+            Layout.column: 0
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: 760
             Layout.minimumWidth: 520
-            spacing: Theme.gapMd
-
-            PlanMapPanel {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 280
-                Layout.preferredHeight: 420
-            }
-
-            WaypointList {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 210
-                Layout.preferredHeight: 300
-                onEditRequested: (index) => waypointEditDialog.openForIndex(index)
-            }
+            Layout.minimumHeight: 320
+            Layout.preferredHeight: 360
         }
 
-        ColumnLayout {
+        MissionActions {
+            Layout.row: 0
+            Layout.column: 1
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: 500
             Layout.minimumWidth: 380
-            spacing: Theme.gapMd
+            Layout.minimumHeight: 320
+            Layout.preferredHeight: 360
+        }
 
-            MissionActions {
-                Layout.fillWidth: true
-                Layout.minimumHeight: implicitHeight
-                Layout.preferredHeight: implicitHeight
-            }
+        WaypointList {
+            Layout.row: 1
+            Layout.column: 0
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: 760
+            Layout.minimumWidth: 520
+            Layout.minimumHeight: 250
+            Layout.preferredHeight: 330
+            onEditRequested: (index) => waypointEditDialog.openForIndex(index)
+        }
 
-            ValidationPanel {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 240
-            }
+        ValidationPanel {
+            Layout.row: 1
+            Layout.column: 1
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: 500
+            Layout.minimumWidth: 380
+            Layout.minimumHeight: 250
+            Layout.preferredHeight: 330
         }
     }
 }
