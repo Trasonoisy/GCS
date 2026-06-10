@@ -635,11 +635,11 @@ void MissionViewModel::onMissionPreviewProgress(int currentIndex,
                                                 int totalItems,
                                                 double progress)
 {
-    Q_UNUSED(currentIndex)
     Q_UNUSED(totalItems)
     m_missionPreviewStatus = missionPreviewActive()
         ? QStringLiteral("Running")
         : m_missionPreviewStatus;
+    m_missionPreviewCurrentIndex = currentIndex;
     m_missionPreviewProgress = progress;
     emit missionPreviewChanged();
 }
@@ -648,6 +648,7 @@ void MissionViewModel::onMissionPreviewCompleted(int totalItems)
 {
     m_missionPreviewStatus = QStringLiteral("Completed");
     m_missionPreviewProgress = 1.0;
+    m_missionPreviewCurrentIndex = totalItems > 0 ? totalItems - 1 : -1;
     setStatus(QStringLiteral("Mission preview completed (%1 items)")
               .arg(totalItems));
     emit missionPreviewChanged();
@@ -656,6 +657,7 @@ void MissionViewModel::onMissionPreviewCompleted(int totalItems)
 void MissionViewModel::onMissionPreviewStopped(const QString& reason)
 {
     m_missionPreviewStatus = QStringLiteral("Stopped");
+    m_missionPreviewCurrentIndex = -1;
     setStatus(QStringLiteral("Mission preview stopped: %1").arg(reason));
     emit missionPreviewChanged();
 }

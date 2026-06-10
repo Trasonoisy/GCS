@@ -21,6 +21,38 @@ InfoCard {
 
     property bool followVehicle: true
     property bool showTrail: false
+    readonly property real vehicleMarkerAssetHeadingOffsetDeg: 76.8
+
+    function normalizeHeading(deg) {
+        let out = deg % 360
+        if (out < 0) out += 360
+        return out
+    }
+
+    function bearingDeg(fromLat, fromLon, toLat, toLon) {
+        const phi1 = fromLat * Math.PI / 180.0
+        const phi2 = toLat * Math.PI / 180.0
+        const dLon = (toLon - fromLon) * Math.PI / 180.0
+        const y = Math.sin(dLon) * Math.cos(phi2)
+        const x = Math.cos(phi1) * Math.sin(phi2)
+                - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLon)
+        return normalizeHeading(Math.atan2(y, x) * 180.0 / Math.PI)
+    }
+
+    function vehicleMarkerHeadingDeg() {
+        if (missionVm.missionPreviewActive
+                && vehicleVm.hasValidPosition
+                && missionVm.missionPreviewCurrentIndex >= 0
+                && missionVm.missionPreviewCurrentIndex < missionVm.items.length) {
+            const target = missionVm.items[missionVm.missionPreviewCurrentIndex]
+            if (Number.isFinite(target.latitudeDeg)
+                    && Number.isFinite(target.longitudeDeg)) {
+                return bearingDeg(vehicleVm.latitudeDeg, vehicleVm.longitudeDeg,
+                                  target.latitudeDeg, target.longitudeDeg)
+            }
+        }
+        return vehicleVm.displayHeadingDeg
+    }
 
     MapView {
         id: flyMap
@@ -124,23 +156,26 @@ InfoCard {
             anchorPoint.y: vehicleMarker.height / 2
             sourceItem: Item {
                 id: vehicleMarker
-                width: 38; height: 38
+                readonly property real markerSize: Math.max(
+                    18, Math.min(34, 18 + Math.max(0, flyMap.map.zoomLevel - 10) * 3.2))
+                width: markerSize
+                height: markerSize
                 // Use displayHeadingDeg (course over ground, frozen when
                 // stationary) so the marker doesn't spin when the vehicle
                 // is parked. The on-map status overlay below still shows
                 // the raw autopilot headingDeg for telemetry truthfulness.
-                rotation: vehicleVm.displayHeadingDeg
-                // Triangle pointing up; rotated by heading. Use text instead
-                // of Canvas so telemetry updates cannot trigger requestPaint()
-                // on the wrong QML object through a nested sourceItem context.
-                Label {
+                // The selected PNG points east-north-east by default, so
+                // subtract its native heading to make 0 deg point north.
+                rotation: root.vehicleMarkerHeadingDeg()
+                          - root.vehicleMarkerAssetHeadingOffsetDeg
+                Image {
                     anchors.centerIn: parent
-                    text: "\u25B2"
-                    color: vehicleVm.armed ? Theme.danger : Theme.warning
-                    font.bold: true
-                    font.pixelSize: 32
-                    style: Text.Outline
-                    styleColor: "white"
+                    width: parent.width
+                    height: parent.height
+                    source: "../assets/vehicle_marker_black.png"
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: true
                 }
             }
         }

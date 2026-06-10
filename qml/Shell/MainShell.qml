@@ -14,6 +14,7 @@ Rectangle {
     // Default to Plan so the operator opens straight into the planner.
     property int initialTabIndex: 0
     property int currentTabIndex: initialTabIndex
+    readonly property int headerActionIconSize: 11
 
     signal goHome()
     signal goConnect()
@@ -184,17 +185,29 @@ Rectangle {
                 // pill action buttons: Change link / Home
                 Rectangle {
                     Layout.preferredHeight: 30
-                    Layout.preferredWidth: 110
+                    Layout.preferredWidth: 124
                     radius: 15
                     color: changeMA.containsMouse ? Theme.hoverSurface : Theme.surfaceElevated
                     border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 100 } }
-                    Label {
+                    RowLayout {
                         anchors.centerIn: parent
-                        text: qsTr("Change link")
-                        color: Theme.textPrimary
-                        font.pixelSize: 11
+                        spacing: 6
+                        Image {
+                            Layout.preferredWidth: root.headerActionIconSize
+                            Layout.preferredHeight: root.headerActionIconSize
+                            Layout.alignment: Qt.AlignVCenter
+                            source: "../assets/link.png"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
+                        }
+                        Label {
+                            text: qsTr("Change link")
+                            color: Theme.textPrimary
+                            font.pixelSize: 11
+                        }
                     }
                     MouseArea {
                         id: changeMA
@@ -209,17 +222,29 @@ Rectangle {
 
                 Rectangle {
                     Layout.preferredHeight: 30
-                    Layout.preferredWidth: 80
+                    Layout.preferredWidth: 92
                     radius: 15
                     color: homeMA.containsMouse ? Theme.hoverSurface : Theme.surfaceElevated
                     border.color: Theme.border
                     border.width: 1
                     Behavior on color { ColorAnimation { duration: 100 } }
-                    Label {
+                    RowLayout {
                         anchors.centerIn: parent
-                        text: qsTr("Home")
-                        color: Theme.textPrimary
-                        font.pixelSize: 11
+                        spacing: 6
+                        Image {
+                            Layout.preferredWidth: root.headerActionIconSize
+                            Layout.preferredHeight: root.headerActionIconSize
+                            Layout.alignment: Qt.AlignVCenter
+                            source: "../assets/home.png"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
+                        }
+                        Label {
+                            text: qsTr("Home")
+                            color: Theme.textPrimary
+                            font.pixelSize: 11
+                        }
                     }
                     MouseArea {
                         id: homeMA

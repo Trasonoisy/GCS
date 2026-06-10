@@ -55,7 +55,7 @@ Rectangle {
 
             Label {
                 anchors.centerIn: parent
-                text: qsTr("< Back")
+                text: qsTr("Back")
                 color: Theme.textPrimary
                 font.pixelSize: 12
             }
@@ -246,7 +246,7 @@ Rectangle {
 
                 Label {
                     anchors.centerIn: parent
-                    text: qsTr("Continue >")
+                    text: qsTr("Continue")
                     color: "white"
                     font.pixelSize: 13
                     font.weight: Font.DemiBold

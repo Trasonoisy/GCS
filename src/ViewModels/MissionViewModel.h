@@ -58,6 +58,7 @@ class MissionViewModel : public QObject
     Q_PROPERTY(QString      missionPreviewBlockedReason READ missionPreviewBlockedReason NOTIFY missionPreviewChanged)
     Q_PROPERTY(QString      missionPreviewStatus READ missionPreviewStatus NOTIFY missionPreviewChanged)
     Q_PROPERTY(double       missionPreviewProgress READ missionPreviewProgress NOTIFY missionPreviewChanged)
+    Q_PROPERTY(int          missionPreviewCurrentIndex READ missionPreviewCurrentIndex NOTIFY missionPreviewChanged)
 
 public:
     explicit MissionViewModel(gcs::vehicle::MultiVehicleManager* manager,
@@ -93,6 +94,7 @@ public:
     QString missionPreviewBlockedReason() const;
     QString missionPreviewStatus() const { return m_missionPreviewStatus; }
     double  missionPreviewProgress() const { return m_missionPreviewProgress; }
+    int     missionPreviewCurrentIndex() const { return m_missionPreviewCurrentIndex; }
 
     void setMissionPreviewMockVehicle(gcs::simulation::MockVehicle* mockVehicle);
 
@@ -173,6 +175,7 @@ private:
 
     QString m_missionPreviewStatus = QStringLiteral("Idle");
     double  m_missionPreviewProgress = 0.0;
+    int     m_missionPreviewCurrentIndex = -1;
 };
 
 } // namespace gcs::viewmodels

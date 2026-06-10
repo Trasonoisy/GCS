@@ -111,4 +111,7 @@ qt_add_qml_module(LabGCSApp
         qml/Shell/MainShell.qml
     RESOURCES
         qml/assets/logo.png
+        qml/assets/home.png
+        qml/assets/link.png
+        qml/assets/vehicle_marker_black.png
 )
