@@ -36,6 +36,11 @@ Item {
         return isNaN(value) ? 0 : value
     }
 
+    function modelValue(model, index, fallback) {
+        if (index < 0 || index >= model.length) return fallback
+        return model[index].value
+    }
+
     function loadFromItem(index) {
         const item = missionVm.items[index]
         if (item === undefined || item === null) return false
@@ -62,6 +67,9 @@ Item {
 
     function applyChanges() {
         if (waypointIndex < 0 || waypointIndex >= missionVm.itemCount) return
+
+        commandValue = modelValue(commandModel, commandCombo.currentIndex, commandValue)
+        frameValue = modelValue(frameModel, frameCombo.currentIndex, frameValue)
 
         missionVm.updateWaypointField(waypointIndex, "command", commandValue)
         missionVm.updateWaypointField(waypointIndex, "frame", frameValue)
@@ -155,22 +163,26 @@ Item {
 
                     Label { text: qsTr("Command"); color: Theme.textSecondary }
                     StyledComboBox {
+                        id: commandCombo
                         Layout.fillWidth: true
                         model: root.commandModel
                         textRole: "text"
                         valueRole: "value"
                         currentIndex: root.commandIndex(root.commandValue)
-                        onActivated: (idx) => root.commandValue = root.commandModel[idx].value
+                        onActivated: (idx) => root.commandValue = root.modelValue(root.commandModel, idx, root.commandValue)
+                        onCurrentIndexChanged: root.commandValue = root.modelValue(root.commandModel, currentIndex, root.commandValue)
                     }
 
                     Label { text: qsTr("Frame"); color: Theme.textSecondary }
                     StyledComboBox {
+                        id: frameCombo
                         Layout.fillWidth: true
                         model: root.frameModel
                         textRole: "text"
                         valueRole: "value"
                         currentIndex: root.frameIndex(root.frameValue)
-                        onActivated: (idx) => root.frameValue = root.frameModel[idx].value
+                        onActivated: (idx) => root.frameValue = root.modelValue(root.frameModel, idx, root.frameValue)
+                        onCurrentIndexChanged: root.frameValue = root.modelValue(root.frameModel, currentIndex, root.frameValue)
                     }
 
                     Label { text: qsTr("Latitude (deg)"); color: Theme.textSecondary }
