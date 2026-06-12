@@ -3,7 +3,7 @@
 Lab GCS MVP là ứng dụng trạm điều khiển mặt đất (Ground Control Station - GCS)
 cho UAV/drone, được xây dựng bằng Qt 6, QML, C++17, CMake và QtTest.
 
-Ứng dụng tập trung vào các chức năng cốt lõi của một GCS trong môi trường lab:
+Ứng dụng này tập trung vào các chức năng cốt lõi của một GCS trong môi trường lab:
 
 - Lập kế hoạch bay trên bản đồ.
 - Tạo, sửa, xóa và sắp xếp waypoint.
@@ -18,14 +18,14 @@ cho UAV/drone, được xây dựng bằng Qt 6, QML, C++17, CMake và QtTest.
 
 ## Lưu Ý An Toàn
 
-Phiên bản hiện tại dùng cho nghiên cứu, demo và mô phỏng trong lab. Không dùng để
+Phiên bản hiện tại được dùng cho nghiên cứu, demo và mô phỏng trong lab. Không dùng để
 bay drone thật ngoài đời.
 
 Trong chế độ serial/hardware, ứng dụng chỉ thiết kế theo hướng telemetry read-only.
 Các lệnh outbound đến hardware thật như arm, takeoff, RTL, mission start, manual
 control và mission write đều không phải phạm vi sử dụng của phiên bản này.
 
-## Yêu Cầu Cài Đặt
+## Yêu Cầu Khi Cài Đặt
 
 Khuyến nghị chạy trên Windows 10/11.
 
